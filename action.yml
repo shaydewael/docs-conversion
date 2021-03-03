@@ -1,8 +1,8 @@
 name: 'Hello World'
 description: 'Parse docs'
 inputs:
-  template:
-    description: 'Defines template used to parse content'
+  schema:
+    description: 'Defines schema used to parse content'
     required: true
   source:
     description: 'Directories that contain the md files'
