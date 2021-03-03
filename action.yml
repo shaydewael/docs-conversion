@@ -1,0 +1,20 @@
+name: 'Hello World'
+description: 'Parse docs'
+inputs:
+  template:
+    description: 'Defines template used to parse content'
+    required: true
+  source:
+    description: 'Directories that contain the md files'
+    required: true
+    default: '~'
+  output:
+    description: 'Directory to ouput all files'
+    required: true
+    default: '~'
+outputs:
+  time: # id of output
+    description: 'The time we greeted you'
+runs:
+  using: 'node12'
+  main: 'src/index.js'

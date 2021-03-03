@@ -1,0 +1,24 @@
+metadata: # Jekyll front matter
+  start: '---'
+  end: '---'
+  delimiter: ':'
+
+sections:
+  main:
+    start: '<div class="section-content">'
+    end: '</div>'
+    # Skip file if this doesn't section doesnt exist
+    required: true
+  code:
+    start: '```javascript'
+    end: '```'
+  secondary_title:
+    start: '<h4 class="section-head">'
+    end: '</h4>'
+  secondary_content:
+    start: '<div class="secondary-content" markdown="0">'
+    end: '</div>'
+  secondary_code:
+    start: '```javascript'
+    end: '```'
+
