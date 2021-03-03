@@ -13,10 +13,8 @@ function parseTemplate(path) {
     }
 }
 
-async function run() {
+function run() {
     template = parseTemplate(core.getInput("template"));
 }
 
 run();
-
-export default run;
