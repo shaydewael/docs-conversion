@@ -5,12 +5,12 @@ const path = require('path');
 
 let template;
 
-function parseTemplate(path) {
+function parseTemplate(p) {
     // for now faking path
-    path = '../jekyll-template.yml';
-    
+    p = path.resolve(__dirname, "../jekyll-template.yml")
+
     try {
-        const doc = yaml.load(fs.readFileSync(path, 'utf8'));
+        const doc = yaml.load(fs.readFileSync(p, 'utf8'));
         console.log(doc);
     } catch (e) {
         console.log(e);
