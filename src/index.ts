@@ -1,32 +1,15 @@
-const core = require('@actions/core');
-const yaml = require('js-yaml');
-const fs   = require('fs');
-const path = require('path');
+import * as core from '@actions/core';
+import { default as Schema } from './schema';
+import * as path from 'path';
+import * as fs from 'fs';
 
-
-/**
- * Parse a given yaml template
- * 
- * Returns a JSON object
- */
-function parseTemplate(p) {
-    // for now faking path
-    p = "../jekyll-template.yml";
-    p = path.resolve(__dirname, p)
-    try {
-        const t = yaml.load(fs.readFileSync(p, 'utf8'));
-        console.log(`Template:\n ${t}\n\n\n`);
-    } catch (e) {
-        console.log(`Template error: ${e}\n\n\n`);
-        return;
-    }
-
-    return t;
-}
-
-function parseFile(template, file) {
+function parseMetadata() {
 
 }
+
+// function parseFile(template, file) {
+
+// }
 
 
 /**
@@ -34,16 +17,25 @@ function parseFile(template, file) {
  * 
  * Returns an array of resolved paths
  */
-function fetchMDFiles(dir) {
+// function fetchMarkdownFiles(dir) {
 
-}
+// }
 
 
 
-function run() {
+async function run() {
     // Define the template
-    schema = parseTemplate(core.getInput("schema"));
+    const schema = new Schema({
+        path: "../samples/jekyll-template.yml",
+    });
 
+    const p = path.resolve(__dirname, "../samples/doc1.md");
+    const d = fs.readFileSync(p, 'utf8');
+
+    const result = schema.apply(d);
+    // console.log(result[0]);
+
+    //console.log(schema);
 
 }
 
