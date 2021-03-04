@@ -46,14 +46,14 @@ function run() {
         var schema, doc;
         return __generator(this, function (_a) {
             schema = new schema_1.default({
-                path: "../samples/jekyll-template.yml",
+                path: "../templates/jekyll-template.yml",
             });
             doc = new document_1.default({
                 schema: schema,
-                files: ['../samples/doc1.md', '../samples/doc2.md'],
+                // files: ['../samples/doc1.md', '../samples/doc2.md'],
                 directories: {
-                    out: 'render',
-                    in: '.'
+                    out: 'compiled',
+                    in: 'samples'
                 },
                 content: ['main', 'code']
             });

@@ -8,13 +8,13 @@ export default class Documenter {
   public schema: Schema;
   public content: string[];
 
-  private files: string[];
-  private directories: { in: string, out: string; };
+  private files: string[] | undefined;
+  private directories: { in: string | undefined, out: string; };
 
   constructor({
     schema = undefined,
     directories = {
-      in: '.',
+      in: undefined,
       out: '.',
     },
     content = [],
@@ -26,12 +26,13 @@ export default class Documenter {
     this.directories = directories;
     this.content = content;
 
-    this.files = compileFiles(directories.in, files);
-    
+    // TODO: probs just handle this in render()
+    this.files = this.compileFiles(files);
   }
 
   public async render() {
     let files = this.files;
+    if (!files) return;
   
     for (let f in files) {
       let renderedContent = '';
@@ -60,21 +61,30 @@ export default class Documenter {
       }
     }
   }
-}
 
-function compileFiles(inDir: string, files: string | string[]): string[] {
-  let fileArr: string[] = [];
-  if (typeof files === 'string') {
-    fileArr.push(`${files}`);
-  } else {
-    for (let f in files) {
-      fileArr.push(`${files[f]}`);
+  async compileFiles(files: string | string[]): string[] {
+    let fileArr: string[] = [];
+
+    if (this.directories.in) {
+      let f = await getDirectoryFiles(this.directories.in);
+      return f;
+    } else {
+      if (typeof files === 'string') {
+        fileArr.push(`${files}`);
+      } else {
+        for (let f in files) {
+          fileArr.push(`${files[f]}`);
+        }
+      }
+      return fileArr;
     }
   }
-
-  return fileArr;
 }
 
+async function getDirectoryFiles(dir: string): Promise<string[]> {
+  let inPath = path.join(__dirname, `../${dir}`);
+  return fs.promises.readdir(inPath);
+}
 
 // compileContent() {
 //   for (let section in selected) {
@@ -89,7 +99,7 @@ interface DocumenterOptions {
   schema?: Schema;
   files?: string | string[];
   directories?: {
-    in: string;
+    in: string | undefined;
     out: string;
   };
   content: string[];

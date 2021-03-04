@@ -61,14 +61,15 @@ var helpers_1 = require("./helpers");
 var Documenter = /** @class */ (function () {
     function Documenter(_a) {
         var _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
-            in: '.',
+            in: undefined,
             out: '.',
         } : _c, _d = _a.content, content = _d === void 0 ? [] : _d, _e = _a.files, files = _e === void 0 ? '' : _e;
         //TODO
         this.schema = schema;
         this.directories = directories;
         this.content = content;
-        this.files = compileFiles(directories.in, files);
+        // TODO: probs just handle this in render()
+        this.files = this.compileFiles(files);
     }
     Documenter.prototype.render = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -76,6 +77,8 @@ var Documenter = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 files = this.files;
+                if (!files)
+                    return [2 /*return*/];
                 _loop_1 = function (f) {
                     var renderedContent = '';
                     var fileName = files[f];
@@ -111,18 +114,41 @@ var Documenter = /** @class */ (function () {
             });
         });
     };
+    Documenter.prototype.compileFiles = function (files) {
+        return __awaiter(this, void 0, void 0, function () {
+            var fileArr, f, f;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        fileArr = [];
+                        if (!this.directories.in) return [3 /*break*/, 2];
+                        return [4 /*yield*/, getDirectoryFiles(this.directories.in)];
+                    case 1:
+                        f = _a.sent();
+                        return [2 /*return*/, f];
+                    case 2:
+                        if (typeof files === 'string') {
+                            fileArr.push("" + files);
+                        }
+                        else {
+                            for (f in files) {
+                                fileArr.push("" + files[f]);
+                            }
+                        }
+                        return [2 /*return*/, fileArr];
+                }
+            });
+        });
+    };
     return Documenter;
 }());
 exports.default = Documenter;
-function compileFiles(inDir, files) {
-    var fileArr = [];
-    if (typeof files === 'string') {
-        fileArr.push("" + files);
-    }
-    else {
-        for (var f in files) {
-            fileArr.push("" + files[f]);
-        }
-    }
-    return fileArr;
+function getDirectoryFiles(dir) {
+    return __awaiter(this, void 0, void 0, function () {
+        var inPath;
+        return __generator(this, function (_a) {
+            inPath = path.join(__dirname, "../" + dir);
+            return [2 /*return*/, fs.promises.readdir(inPath)];
+        });
+    });
 }
