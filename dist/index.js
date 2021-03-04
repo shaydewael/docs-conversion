@@ -61,27 +61,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var schema_1 = __importDefault(require("./schema"));
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
-function parseMetadata() {
-}
-// function parseFile(template, file) {
-// }
-/**
- * Gather markdown files in directory
- *
- * Returns an array of resolved paths
- */
-// function fetchMarkdownFiles(dir) {
-// }
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var schema, p, d, result;
-        return __generator(this, function (_a) {
+        var schema, p, d, _a, metadata, sections;
+        return __generator(this, function (_b) {
             schema = new schema_1.default({
                 path: "../samples/jekyll-template.yml",
             });
             p = path.resolve(__dirname, "../samples/doc1.md");
             d = fs.readFileSync(p, 'utf8');
-            result = schema.apply(d);
+            _a = schema.apply(d), metadata = _a.metadata, sections = _a.sections;
             return [2 /*return*/];
         });
     });

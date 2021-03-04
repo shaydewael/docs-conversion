@@ -46,37 +46,61 @@ var Schema = /** @class */ (function () {
         }
     };
     // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
-    Schema.prototype.apply = function (file) {
-        var metadataResult = this.buildMetadata(file);
+    Schema.prototype.apply = function (fileContent) {
+        var metadataResult = this.buildMetadata(fileContent);
+        var contentSections = {};
+        var sectionKeys = Object.keys(this.sections);
+        for (var section in sectionKeys) {
+            var result = this.buildSection(fileContent, sectionKeys[section]);
+            contentSections[sectionKeys[section]] = result;
+        }
+        return {
+            sections: contentSections,
+            metadata: metadataResult
+        };
+    };
+    // TODO: breakout options discluding first param into an object
+    // TODO: strip linebreaks
+    Schema.prototype.buildSection = function (s, name, inclusive) {
+        if (inclusive === void 0) { inclusive = false; }
+        var section = this.sections[name];
+        var start = section.start, end = section.end;
+        if (!inclusive) {
+            start = "" + toPosBehind(start);
+            end = "" + toPosAhead(end);
+        }
+        var res = getSection(s, start, end, 'gm');
+        return res ? res[1] : undefined;
     };
     Schema.prototype.buildMetadata = function (m) {
         if (this.metadata === undefined)
             return;
         // TODO: make newline optional
-        var start = toPosBehind(this.metadata.start) + "[\\r\\n]";
+        var start = toPosBehind(this.metadata.start) + "[\\r\\n]?";
         var end = "" + toPosAhead(this.metadata.end);
         // TODO: like...errors tho
         var group = getSection(m, start, end, 'gm');
-        return parseObj(group[0]);
+        if (!group) {
+            return new Error("Error parsing metadata");
+        }
+        else {
+            return parseObj(group[0]);
+        }
     };
     return Schema;
 }());
 exports.default = Schema;
-function getSection(str, start, end, flags) {
-    var f = flags ? flags : '';
-    var chars = "(.|[\r\n])*";
-    var re = new RegExp(start + chars + end, f);
-    return re.exec(str);
+function getSection(text, start, end, flags) {
+    if (flags === void 0) { flags = ''; }
+    // TODO: better way to do this im sure
+    var optionalLineBreak = "[\\r\\n]?";
+    var chars = optionalLineBreak + "((.|[\\r\\n])+?)" + optionalLineBreak;
+    var re = new RegExp(start + chars + end, flags);
+    return re.exec(text);
 }
 /**
  * Helper RegExp functions
  */
-function toPosBehind(str) {
-    return "(?<=" + str + ")";
-}
-function toPosAhead(str) {
-    return "(?=" + str + ")";
-}
 function parseObj(str) {
     var result = {};
     var pair;
@@ -90,4 +114,10 @@ function parseObj(str) {
         }
     }
     return result;
+}
+function toPosBehind(str) {
+    return "(?<=" + str + ")";
+}
+function toPosAhead(str) {
+    return "(?=" + str + ")";
 }

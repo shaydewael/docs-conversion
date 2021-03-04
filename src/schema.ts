@@ -4,7 +4,7 @@ import * as path from 'path';
 
 export default class Schema {
   public metadata: SchemaMetadata | undefined;
-  public sections: SchemaSection[];
+  public sections: { [key: string]: SchemaSection };
 
   constructor(opts: SchemaOptions) {
       let { metadata, sections } = this.parseSchema(opts.path);
@@ -31,43 +31,68 @@ export default class Schema {
   }
 
   // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
-  apply(file: string): any {
-    let metadataResult = this.buildMetadata(file);
-    
+  apply(fileContent: any): any {
+    let metadataResult = this.buildMetadata(fileContent);
+    let contentSections: {[key: string]: any} = {};
+    let sectionKeys = Object.keys(this.sections);
+
+    for (var section in sectionKeys) {
+      let result = this.buildSection(fileContent, sectionKeys[section]);
+      contentSections[sectionKeys[section]] = result;
+    }
+
+    return {
+      sections: contentSections,
+      metadata: metadataResult
+    };
   }
 
-  buildMetadata(m: string): any {
+  // TODO: breakout options discluding first param into an object
+  // TODO: strip linebreaks
+  buildSection(s: string, name: string, inclusive: boolean = false): any {
+    let section = this.sections[name];
+    let { start, end } = section;
+
+    if (!inclusive) {
+      start = `${toPosBehind(start)}`;
+      end = `${toPosAhead(end)}`;
+    }
+
+    const res = getSection(s, start, end, 'gm')
+
+    return res ? res[1] : undefined;
+  }
+
+  buildMetadata(m: any): any {
     if (this.metadata === undefined) return;
 
     // TODO: make newline optional
-    let start = `${toPosBehind(this.metadata.start)}[\\r\\n]`;
+    let start = `${toPosBehind(this.metadata.start)}[\\r\\n]?`;
     let end = `${toPosAhead(this.metadata.end)}`;
 
     // TODO: like...errors tho
     let group = getSection(m, start, end, 'gm');
-    return parseObj(group[0]);
+
+    if (!group) {
+      return new Error("Error parsing metadata");
+    } else {
+      return parseObj(group[0]);
+    }
   }
 }
 
-function getSection(str: string, start: string, end: string, flags?: string): any {
-  let f = flags ? flags : '';
-  let chars = "(.|[\r\n])*";
+function getSection(text: string, start: string, end: string, flags: string = ''): RegExpExecArray | null {
+  // TODO: better way to do this im sure
+  const optionalLineBreak = "[\\r\\n]?";
+  let chars = optionalLineBreak + "((.|[\\r\\n])+?)" + optionalLineBreak;
 
-  let re = new RegExp(start + chars + end, f);
-  return re.exec(str);
+  let re = new RegExp(start + chars + end, flags);
+  return re.exec(text);
 }
 
 /**
  * Helper RegExp functions
  */
-
-function toPosBehind(str: string): string {
-  return `(?<=${str})`;
-}
-
-function toPosAhead(str: string): string {
-  return `(?=${str})`;
-}
 
 function parseObj(str: string): any {
   let result: {[key: string]: any} = {};
@@ -85,6 +110,13 @@ function parseObj(str: string): any {
   return result;
 }
 
+function toPosBehind(str: string): string {
+  return `(?<=${str})`;
+}
+
+function toPosAhead(str: string): string {
+  return `(?=${str})`;
+}
 
 
 /**

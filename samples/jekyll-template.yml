@@ -6,7 +6,7 @@ metadata: # Jekyll front matter
 sections:
   main:
     start: '<div class="section-content">'
-    end: '</div>'
+    end: '<\/div>'
     # Skip file if this doesn't section doesnt exist
     required: true
   code:
