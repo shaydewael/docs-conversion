@@ -3,7 +3,7 @@
  * Helper RegExp functions
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lb = exports.toPosAhead = exports.toPosBehind = exports.parseObj = void 0;
+exports.lb = exports.getFileName = exports.toPosAhead = exports.toPosBehind = exports.parseObj = void 0;
 function parseObj(str) {
     var result = {};
     var pair;
@@ -27,4 +27,9 @@ function toPosAhead(str) {
     return "(?=" + str + ")";
 }
 exports.toPosAhead = toPosAhead;
+function getFileName(str) {
+    var filter = (new RegExp("^.*/\/?(.*)\\..*$")).exec(str);
+    return filter ? filter[1] : str;
+}
+exports.getFileName = getFileName;
 exports.lb = "[\\r\\n]?";

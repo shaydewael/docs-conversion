@@ -57,6 +57,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
+var helpers_1 = require("./helpers");
 var Documenter = /** @class */ (function () {
     function Documenter(_a) {
         var _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
@@ -71,29 +72,40 @@ var Documenter = /** @class */ (function () {
     }
     Documenter.prototype.render = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var f, renderedContent, section, files, p, d, _a, metadata, sections;
-            return __generator(this, function (_b) {
-                f = '';
-                renderedContent = '';
-                section = '';
+            var files, _loop_1, f;
+            var _this = this;
+            return __generator(this, function (_a) {
                 files = this.files;
-                console.log(files);
-                for (f in files) {
-                    console.log(f);
-                    p = path.resolve(__dirname, "../samples/doc1.md");
-                    console.log(p);
-                    d = fs.readFile(p, function (e) {
-                        console.log("Error: " + e);
-                    });
-                    console.log(d);
-                    _a = this.schema.apply(d), metadata = _a.metadata, sections = _a.sections;
-                    for (section in this.content) {
-                        renderedContent += sections[this.content[section]] + "\n";
-                        console.log(renderedContent);
-                        fs.writeFile(path.resolve(__dirname, "../" + this.directories.out + "/" + files[f]), renderedContent, function () {
-                            console.log("Created name.md");
+                _loop_1 = function (f) {
+                    var renderedContent = '';
+                    var fileName = files[f];
+                    var pathIn = path.resolve(__dirname, fileName);
+                    try {
+                        fs.readFile(pathIn, 'utf-8', function (err, data) {
+                            if (err)
+                                throw new Error("Failed to access defined file: " + pathIn);
+                            var _a = _this.schema.apply(data), _ = _a._, sections = _a.sections;
+                            if (!sections)
+                                throw new Error('Invalid content');
+                            var _loop_2 = function (c) {
+                                renderedContent += sections[_this.content[c]] + "\n";
+                                var outPath = path.join(__dirname, "../" + _this.directories.out);
+                                fs.promises.mkdir(outPath, { recursive: true }).then(function (val) {
+                                    var str = helpers_1.getFileName(fileName);
+                                    fs.promises.writeFile(outPath + ("/" + str + ".md"), renderedContent, { flag: 'w' });
+                                });
+                            };
+                            for (var c in _this.content) {
+                                _loop_2(c);
+                            }
                         });
                     }
+                    catch (err) {
+                        console.error("ERROR: " + err);
+                    }
+                };
+                for (f in files) {
+                    _loop_1(f);
                 }
                 return [2 /*return*/];
             });
@@ -108,9 +120,8 @@ function compileFiles(inDir, files) {
         fileArr.push("" + files);
     }
     else {
-        var f = '';
-        for (var f_1 in files) {
-            fileArr.push("../" + inDir + "/" + files[f_1]);
+        for (var f in files) {
+            fileArr.push("" + files[f]);
         }
     }
     return fileArr;

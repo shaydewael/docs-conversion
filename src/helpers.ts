@@ -26,4 +26,9 @@ export function toPosAhead(str: string): string {
   return `(?=${str})`;
 }
 
+export function getFileName(str: string): string {
+  let filter = (new RegExp("^.*/\/?(.*)\\..*$")).exec(str);
+  return filter ? filter[1] : str;
+}
+
 export const lb = "[\\r\\n]?";

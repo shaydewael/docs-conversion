@@ -10,13 +10,9 @@ async function run() {
         path: "../samples/jekyll-template.yml",
     });
 
-    // TODO: move to another function
-    const p = path.resolve(__dirname, "../samples/doc1.md");
-    const d = fs.readFileSync(p, 'utf8');
-
     const doc = new Document({
         schema: schema,
-        files: '../samples/doc1.md',
+        files: ['../samples/doc1.md', '../samples/doc2.md'],
         directories: {
             out: 'render',
             in: '.'

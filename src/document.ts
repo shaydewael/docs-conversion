@@ -2,6 +2,7 @@ import { create } from 'domain';
 import { default as Schema } from './schema';
 import * as path from 'path';
 import * as fs from 'fs';
+import { getFileName } from './helpers';
 
 export default class Documenter {
   public schema: Schema;
@@ -30,32 +31,32 @@ export default class Documenter {
   }
 
   public async render() {
-    let f = '';
-    let renderedContent = '';
-    let section = '';
     let files = this.files;
-    console.log(files);
   
-    for (f in files) {
-      console.log(f);
-      const p = path.resolve(__dirname, "../samples/doc1.md");
-      console.log(p)
-      const d = fs.readFile(p, (e) => {
-        console.log(`Error: ${e}`)
-      });
-    
+    for (let f in files) {
+      let renderedContent = '';
+      let fileName = files[f];
+      let pathIn = path.resolve(__dirname, fileName);
       
-      console.log(d);
-      let { metadata, sections } = this.schema.apply(d);
-      
-      
-      for (section in this.content) { 
-        renderedContent += `${sections[this.content[section]]}\n`;
-        console.log(renderedContent);
+      try {
+        fs.readFile(pathIn, 'utf-8', (err, data) => {
+          if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
 
-        fs.writeFile(path.resolve(__dirname, `../${this.directories.out}/${files[f]}`), renderedContent, () => {
-          console.log(`Created name.md`);
+          let { _, sections } = this.schema.apply(data);
+          if (!sections) throw new Error('Invalid content');
+
+          for (let c in this.content) { 
+            renderedContent += `${sections[this.content[c]]}\n`;
+
+            let outPath = path.join(__dirname, `../${this.directories.out}`);
+            fs.promises.mkdir(outPath, { recursive: true }).then((val) => {
+              let str = getFileName(fileName);
+              fs.promises.writeFile(outPath + `/${str}.md`, renderedContent, { flag: 'w' });
+            });
+          }
         });
+      } catch(err) {
+        console.error(`ERROR: ${err}`);
       }
     }
   }
@@ -66,9 +67,8 @@ function compileFiles(inDir: string, files: string | string[]): string[] {
   if (typeof files === 'string') {
     fileArr.push(`${files}`);
   } else {
-    let f = '';
     for (let f in files) {
-      fileArr.push(`../${inDir}/${files[f]}`);
+      fileArr.push(`${files[f]}`);
     }
   }
 
