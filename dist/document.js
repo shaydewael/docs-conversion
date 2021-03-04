@@ -54,35 +54,64 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var schema_1 = __importDefault(require("./schema"));
-var document_1 = __importDefault(require("./document"));
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
-function run() {
-    return __awaiter(this, void 0, void 0, function () {
-        var schema, p, d, doc;
-        return __generator(this, function (_a) {
-            schema = new schema_1.default({
-                path: "../samples/jekyll-template.yml",
+var Documenter = /** @class */ (function () {
+    function Documenter(_a) {
+        var _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
+            in: '.',
+            out: '.',
+        } : _c, _d = _a.content, content = _d === void 0 ? [] : _d, _e = _a.files, files = _e === void 0 ? '' : _e;
+        //TODO
+        this.schema = schema;
+        this.directories = directories;
+        this.content = content;
+        this.files = compileFiles(directories.in, files);
+    }
+    Documenter.prototype.render = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var f, renderedContent, section, files, p, d, _a, metadata, sections;
+            return __generator(this, function (_b) {
+                f = '';
+                renderedContent = '';
+                section = '';
+                files = this.files;
+                console.log(files);
+                for (f in files) {
+                    console.log(f);
+                    p = path.resolve(__dirname, "../samples/doc1.md");
+                    console.log(p);
+                    d = fs.readFile(p, function (e) {
+                        console.log("Error: " + e);
+                    });
+                    console.log(d);
+                    _a = this.schema.apply(d), metadata = _a.metadata, sections = _a.sections;
+                    for (section in this.content) {
+                        renderedContent += sections[this.content[section]] + "\n";
+                        console.log(renderedContent);
+                        fs.writeFile(path.resolve(__dirname, "../" + this.directories.out + "/" + files[f]), renderedContent, function () {
+                            console.log("Created name.md");
+                        });
+                    }
+                }
+                return [2 /*return*/];
             });
-            p = path.resolve(__dirname, "../samples/doc1.md");
-            d = fs.readFileSync(p, 'utf8');
-            doc = new document_1.default({
-                schema: schema,
-                files: '../samples/doc1.md',
-                directories: {
-                    out: 'render',
-                    in: '.'
-                },
-                content: ['main']
-            });
-            doc.render();
-            return [2 /*return*/];
         });
-    });
+    };
+    return Documenter;
+}());
+exports.default = Documenter;
+function compileFiles(inDir, files) {
+    var fileArr = [];
+    if (typeof files === 'string') {
+        fileArr.push("" + files);
+    }
+    else {
+        var f = '';
+        for (var f_1 in files) {
+            fileArr.push("../" + inDir + "/" + files[f_1]);
+        }
+    }
+    return fileArr;
 }
-run();

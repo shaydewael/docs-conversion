@@ -22,13 +22,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var yaml = __importStar(require("js-yaml"));
 var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
+var helpers_1 = require("./helpers");
 var Schema = /** @class */ (function () {
     function Schema(opts) {
-        var _a = this.parseSchema(opts.path), metadata = _a.metadata, sections = _a.sections;
+        var _a = this.parse(opts.path), metadata = _a.metadata, sections = _a.sections;
         this.metadata = metadata;
         this.sections = sections;
     }
-    Schema.prototype.parseSchema = function (schemaPath) {
+    Schema.prototype.parse = function (schemaPath) {
         try {
             // TODO: should this be handled by user?
             var p = path.resolve(__dirname, schemaPath);
@@ -36,8 +37,8 @@ var Schema = /** @class */ (function () {
             if (!s["sections"])
                 throw new Error("Invalid schema. Sections must exist");
             return {
-                metadata: s["metadata"],
-                sections: s["sections"],
+                metadata: s['metadata'],
+                sections: s['sections']
             };
         }
         catch (e) {
@@ -47,15 +48,17 @@ var Schema = /** @class */ (function () {
     };
     // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
     Schema.prototype.apply = function (fileContent) {
-        var metadataResult = this.buildMetadata(fileContent);
-        var contentSections = {};
+        var metadataResult = this.buildSection(fileContent, 'metadata');
+        var sectionResults = {};
         var sectionKeys = Object.keys(this.sections);
-        for (var section in sectionKeys) {
+        var section;
+        for (section in sectionKeys) {
             var result = this.buildSection(fileContent, sectionKeys[section]);
-            contentSections[sectionKeys[section]] = result;
+            if (result)
+                sectionResults[sectionKeys[section]] = result;
         }
         return {
-            sections: contentSections,
+            sections: sectionResults,
             metadata: metadataResult
         };
     };
@@ -63,29 +66,20 @@ var Schema = /** @class */ (function () {
     // TODO: strip linebreaks
     Schema.prototype.buildSection = function (s, name, inclusive) {
         if (inclusive === void 0) { inclusive = false; }
-        var section = this.sections[name];
-        var start = section.start, end = section.end;
-        if (!inclusive) {
-            start = "" + toPosBehind(start);
-            end = "" + toPosAhead(end);
-        }
-        var res = getSection(s, start, end, 'gm');
-        return res ? res[1] : undefined;
-    };
-    Schema.prototype.buildMetadata = function (m) {
-        if (this.metadata === undefined)
-            return;
-        // TODO: make newline optional
-        var start = toPosBehind(this.metadata.start) + "[\\r\\n]?";
-        var end = "" + toPosAhead(this.metadata.end);
-        // TODO: like...errors tho
-        var group = getSection(m, start, end, 'gm');
-        if (!group) {
-            return new Error("Error parsing metadata");
+        var section;
+        if (name === 'metadata') {
+            if (!this.metadata)
+                return;
+            // TODO don't hack this lol
+            section = this.metadata;
         }
         else {
-            return parseObj(group[0]);
+            section = this.sections[name];
         }
+        var start = section.start, end = section.end;
+        start = helpers_1.toPosBehind(start);
+        end = helpers_1.toPosAhead(end);
+        return getSection(s, start, end, 'gm');
     };
     return Schema;
 }());
@@ -93,31 +87,13 @@ exports.default = Schema;
 function getSection(text, start, end, flags) {
     if (flags === void 0) { flags = ''; }
     // TODO: better way to do this im sure
-    var optionalLineBreak = "[\\r\\n]?";
-    var chars = optionalLineBreak + "((.|[\\r\\n])+?)" + optionalLineBreak;
-    var re = new RegExp(start + chars + end, flags);
-    return re.exec(text);
-}
-/**
- * Helper RegExp functions
- */
-function parseObj(str) {
-    var result = {};
-    var pair;
-    var jsonExp = new RegExp("([a-zA-Z]+)[:\\s]+(.*)[\\n]?", 'g');
-    while ((pair = jsonExp.exec(str)) !== null) {
-        if (pair[1] && pair[2]) {
-            result[pair[1]] = pair[2];
-        }
-        else {
-            continue;
-        }
+    var capture = "((.|[\\r\\n])+?)";
+    var re = new RegExp(start + helpers_1.lb + capture + end, flags);
+    var result = re.exec(text);
+    if (result !== null) {
+        return result[1];
     }
-    return result;
-}
-function toPosBehind(str) {
-    return "(?<=" + str + ")";
-}
-function toPosAhead(str) {
-    return "(?=" + str + ")";
+    else {
+        return;
+    }
 }

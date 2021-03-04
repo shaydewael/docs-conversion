@@ -12,6 +12,7 @@ sections:
   code:
     start: '```javascript'
     end: '```'
+    inclusive: true
   secondary_title:
     start: '<h4 class="section-head">'
     end: '</h4>'
@@ -22,3 +23,9 @@ sections:
     start: '```javascript'
     end: '```'
 
+# base is filename
+# $ is variable from sections
+output:
+  base: [ main ]
+  base-js: [ code ]
+  $secondary_title: [ $secondary_content, $secondary_code ]

@@ -1,19 +1,25 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  lb,
+  parseObj, 
+  toPosAhead, 
+  toPosBehind
+} from './helpers';
 
 export default class Schema {
   public metadata: SchemaMetadata | undefined;
   public sections: { [key: string]: SchemaSection };
 
   constructor(opts: SchemaOptions) {
-      let { metadata, sections } = this.parseSchema(opts.path);
+      let { metadata, sections } = this.parse(opts.path);
 
       this.metadata = metadata;
       this.sections = sections;
   }
 
-  parseSchema(schemaPath: string): any {
+  parse(schemaPath: string): any {
     try {
       // TODO: should this be handled by user?
       let p = path.resolve(__dirname, schemaPath);
@@ -21,8 +27,8 @@ export default class Schema {
       if (!s["sections"]) throw new Error("Invalid schema. Sections must exist");
 
       return {
-        metadata: s["metadata"],
-        sections: s["sections"],
+        metadata: s['metadata'],
+        sections: s['sections']
       };
     } catch (e) {
       console.log(`ERROR: ${e}`);
@@ -32,93 +38,51 @@ export default class Schema {
 
   // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
   apply(fileContent: any): any {
-    let metadataResult = this.buildMetadata(fileContent);
-    let contentSections: {[key: string]: any} = {};
+    let metadataResult = this.buildSection(fileContent, 'metadata');
+    let sectionResults: {[key: string]: string} = {};
     let sectionKeys = Object.keys(this.sections);
 
-    for (var section in sectionKeys) {
+    let section
+    for (section in sectionKeys) {
       let result = this.buildSection(fileContent, sectionKeys[section]);
-      contentSections[sectionKeys[section]] = result;
+      if (result) sectionResults[sectionKeys[section]] = result;
     }
 
     return {
-      sections: contentSections,
+      sections: sectionResults,
       metadata: metadataResult
     };
   }
 
   // TODO: breakout options discluding first param into an object
   // TODO: strip linebreaks
-  buildSection(s: string, name: string, inclusive: boolean = false): any {
-    let section = this.sections[name];
+  buildSection(s: string, name: string, inclusive: boolean = false): string | undefined {
+    let section: SchemaMetadata;
+    if (name === 'metadata') {
+      if (!this.metadata) return;
+      // TODO don't hack this lol
+      section = this.metadata;
+    } else {
+      section = this.sections[name];
+    }
+
     let { start, end } = section;
-
-    if (!inclusive) {
-      start = `${toPosBehind(start)}`;
-      end = `${toPosAhead(end)}`;
-    }
-
-    const res = getSection(s, start, end, 'gm')
-
-    return res ? res[1] : undefined;
-  }
-
-  buildMetadata(m: any): any {
-    if (this.metadata === undefined) return;
-
-    // TODO: make newline optional
-    let start = `${toPosBehind(this.metadata.start)}[\\r\\n]?`;
-    let end = `${toPosAhead(this.metadata.end)}`;
-
-    // TODO: like...errors tho
-    let group = getSection(m, start, end, 'gm');
-
-    if (!group) {
-      return new Error("Error parsing metadata");
-    } else {
-      return parseObj(group[0]);
-    }
+    start = toPosBehind(start);
+    end = toPosAhead(end);
+    return getSection(s, start, end, 'gm');
   }
 }
 
-function getSection(text: string, start: string, end: string, flags: string = ''): RegExpExecArray | null {
+function getSection(text: string, start: string, end: string, flags: string = ''): string | undefined  {
   // TODO: better way to do this im sure
-  const optionalLineBreak = "[\\r\\n]?";
-  let chars = optionalLineBreak + "((.|[\\r\\n])+?)" + optionalLineBreak;
+  let capture =  "((.|[\\r\\n])+?)";
 
-  let re = new RegExp(start + chars + end, flags);
-  return re.exec(text);
+  let re: RegExp = new RegExp(start + lb + capture + end, flags);
+  let result = re.exec(text);
+  if (result !== null) {
+    return result[1];
+  } else { return; }
 }
-
-/**
- * Helper RegExp functions
- */
-
-function parseObj(str: string): any {
-  let result: {[key: string]: any} = {};
-  let pair: RegExpExecArray | null;
-  const jsonExp = new RegExp("([a-zA-Z]+)[:\\s]+(.*)[\\n]?", 'g');
-
-  while ((pair = jsonExp.exec(str)) !== null) {
-    if (pair[1] && pair[2]) {
-      result[pair[1]] = pair[2];
-    } else {
-      continue;
-    }
-  }
-
-  return result;
-}
-
-function toPosBehind(str: string): string {
-  return `(?<=${str})`;
-}
-
-function toPosAhead(str: string): string {
-  return `(?=${str})`;
-}
-
-
 /**
  * Interfaces
  */
