@@ -32,3 +32,4 @@ export function getFileName(str: string): string {
 }
 
 export const lb = "[\\r\\n]?";
+export const coreGroup = "(.|[\\r\\n])+?";

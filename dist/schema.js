@@ -51,8 +51,7 @@ var Schema = /** @class */ (function () {
         var metadataResult = this.buildSection(fileContent, 'metadata');
         var sectionResults = {};
         var sectionKeys = Object.keys(this.sections);
-        var section;
-        for (section in sectionKeys) {
+        for (var section in sectionKeys) {
             var result = this.buildSection(fileContent, sectionKeys[section]);
             if (result)
                 sectionResults[sectionKeys[section]] = result;
@@ -64,8 +63,7 @@ var Schema = /** @class */ (function () {
     };
     // TODO: breakout options discluding first param into an object
     // TODO: strip linebreaks
-    Schema.prototype.buildSection = function (s, name, inclusive) {
-        if (inclusive === void 0) { inclusive = false; }
+    Schema.prototype.buildSection = function (s, name) {
         var section;
         if (name === 'metadata') {
             if (!this.metadata)
@@ -76,19 +74,26 @@ var Schema = /** @class */ (function () {
         else {
             section = this.sections[name];
         }
-        var start = section.start, end = section.end;
-        start = helpers_1.toPosBehind(start);
-        end = helpers_1.toPosAhead(end);
-        return getSection(s, start, end, 'gm');
+        var start = section.start, end = section.end, inclusive = section.inclusive;
+        var capture = '';
+        if (!inclusive) {
+            start = helpers_1.toPosBehind(start);
+            end = helpers_1.toPosAhead(end);
+            capture = "" + start + helpers_1.lb + "(" + helpers_1.coreGroup + ")" + end;
+        }
+        else {
+            start = helpers_1.toPosAhead(start);
+            end = end;
+            capture = "" + start + helpers_1.lb + "(" + helpers_1.coreGroup + end + ")";
+        }
+        return getSection(s, capture, 'gm');
     };
     return Schema;
 }());
 exports.default = Schema;
-function getSection(text, start, end, flags) {
+function getSection(text, capture, flags) {
     if (flags === void 0) { flags = ''; }
-    // TODO: better way to do this im sure
-    var capture = "((.|[\\r\\n])+?)";
-    var re = new RegExp(start + helpers_1.lb + capture + end, flags);
+    var re = new RegExp(capture, flags);
     var result = re.exec(text);
     if (result !== null) {
         return result[1];

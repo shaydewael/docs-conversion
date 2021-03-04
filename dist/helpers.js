@@ -3,7 +3,7 @@
  * Helper RegExp functions
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lb = exports.getFileName = exports.toPosAhead = exports.toPosBehind = exports.parseObj = void 0;
+exports.coreGroup = exports.lb = exports.getFileName = exports.toPosAhead = exports.toPosBehind = exports.parseObj = void 0;
 function parseObj(str) {
     var result = {};
     var pair;
@@ -33,3 +33,4 @@ function getFileName(str) {
 }
 exports.getFileName = getFileName;
 exports.lb = "[\\r\\n]?";
+exports.coreGroup = "(.|[\\r\\n])+?";

@@ -5,11 +5,12 @@ import {
   lb,
   parseObj, 
   toPosAhead, 
-  toPosBehind
+  toPosBehind,
+  coreGroup
 } from './helpers';
 
 export default class Schema {
-  public metadata: SchemaMetadata | undefined;
+  public metadata: SchemaSection | undefined;
   public sections: { [key: string]: SchemaSection };
 
   constructor(opts: SchemaOptions) {
@@ -42,8 +43,7 @@ export default class Schema {
     let sectionResults: {[key: string]: string} = {};
     let sectionKeys = Object.keys(this.sections);
 
-    let section
-    for (section in sectionKeys) {
+    for (let section in sectionKeys) {
       let result = this.buildSection(fileContent, sectionKeys[section]);
       if (result) sectionResults[sectionKeys[section]] = result;
     }
@@ -56,33 +56,41 @@ export default class Schema {
 
   // TODO: breakout options discluding first param into an object
   // TODO: strip linebreaks
-  buildSection(s: string, name: string, inclusive: boolean = false): string | undefined {
-    let section: SchemaMetadata;
+  buildSection(s: string, name: string): string | undefined {
+    let section: SchemaSection;
     if (name === 'metadata') {
       if (!this.metadata) return;
       // TODO don't hack this lol
       section = this.metadata;
-    } else {
+    } else { 
       section = this.sections[name];
     }
 
-    let { start, end } = section;
-    start = toPosBehind(start);
-    end = toPosAhead(end);
-    return getSection(s, start, end, 'gm');
+    let { start, end, inclusive } = section;
+    let capture = '';
+
+    if (!inclusive) {
+      start = toPosBehind(start);
+      end = toPosAhead(end);
+      capture = `${start}${lb}(${coreGroup})${end}`;
+    } else {
+      start = toPosAhead(start);
+      end = end;
+      capture = `${start}${lb}(${coreGroup}${end})`;
+    }
+    return getSection(s, capture, 'gm');
   }
 }
 
-function getSection(text: string, start: string, end: string, flags: string = ''): string | undefined  {
-  // TODO: better way to do this im sure
-  let capture =  "((.|[\\r\\n])+?)";
-
-  let re: RegExp = new RegExp(start + lb + capture + end, flags);
+function getSection(text: string, capture: string, flags: string = ''): string | undefined  {
+  let re: RegExp = new RegExp(capture, flags);
   let result = re.exec(text);
+
   if (result !== null) {
     return result[1];
   } else { return; }
 }
+
 /**
  * Interfaces
  */
@@ -90,12 +98,10 @@ interface SchemaOptions {
   path: string;
 }
 
-export interface SchemaMetadata extends BaseSection {
-  delimiter?: string;
-}
-
 export interface SchemaSection extends BaseSection {
-  required: boolean;
+  delimiter?: string;
+  required?: boolean;
+  inclusive?: boolean;
 }
 
 interface BaseSection {

@@ -17,7 +17,7 @@ async function run() {
             out: 'render',
             in: '.'
         },
-        content: [ 'main' ]
+        content: [ 'main', 'code' ]
     });
 
     doc.render();
