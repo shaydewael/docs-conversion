@@ -2,7 +2,7 @@ name: 'Docs conversion'
 author: 'Shay DeWael'
 description: 'Automatically parse and convert markdown files using YAML templates'
 inputs:
-  token:
+  repo-token:
       description: 'The GITHUB_TOKEN secret'
   schema:
     description: 'Defines schema used to parse content'
