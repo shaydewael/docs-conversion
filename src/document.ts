@@ -2,58 +2,49 @@ import { create } from 'domain';
 import { default as Schema } from './schema';
 import * as path from 'path';
 import * as fs from 'fs';
-import { getFileName } from './helpers';
+import { renderFile } from './helpers';
 
 export default class Documenter {
   public schema: Schema;
   public content: string[];
-
+  public directories: { in: string, out: string; };
   private files: string[] | undefined;
-  private directories: { in: string | undefined, out: string; };
 
   constructor({
     schema = undefined,
     directories = {
-      in: undefined,
-      out: '.',
+      in: '',
+      out: '',
     },
     content = [],
     files = ''
   }: DocumenterOptions) {
-    
-    //TODO
     this.schema = schema as Schema;
-    this.directories = directories;
+    this.directories = directories.in ? directories : { in: '', out: directories.out };
     this.content = content;
 
-    // TODO: probs just handle this in render()
-    this.files = this.compileFiles(files);
+    if (typeof files === 'string') files = [files];
+    this.files = files;
   }
 
-  public async render() {
-    let files = this.files;
-    if (!files) return;
-  
+  public async compile() {
+    if (!this.files) return;
+    const files = await this.fetchFiles(this.files);
+    
     for (let f in files) {
       let renderedContent = '';
       let fileName = files[f];
-      let pathIn = path.resolve(__dirname, fileName);
+      let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
       
       try {
         fs.readFile(pathIn, 'utf-8', (err, data) => {
           if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
-
           let { _, sections } = this.schema.apply(data);
           if (!sections) throw new Error('Invalid content');
 
-          for (let c in this.content) { 
+          for (let c in this.content) {
             renderedContent += `${sections[this.content[c]]}\n`;
-
-            let outPath = path.join(__dirname, `../${this.directories.out}`);
-            fs.promises.mkdir(outPath, { recursive: true }).then((val) => {
-              let str = getFileName(fileName);
-              fs.promises.writeFile(outPath + `/${str}.md`, renderedContent, { flag: 'w' });
-            });
+            renderFile(renderedContent, this.directories.out, fileName);
           }
         });
       } catch(err) {
@@ -62,44 +53,30 @@ export default class Documenter {
     }
   }
 
-  async compileFiles(files: string | string[]): string[] {
+  private async fetchFiles(files?: string[]): Promise<string[]> {
     let fileArr: string[] = [];
 
-    if (this.directories.in) {
-      let f = await getDirectoryFiles(this.directories.in);
-      return f;
+    if (this.directories.in !== '') {
+      let inPath = path.join(__dirname, `../${this.directories.in}`);
+      return await fs.promises.readdir(inPath);
     } else {
-      if (typeof files === 'string') {
-        fileArr.push(`${files}`);
-      } else {
-        for (let f in files) {
-          fileArr.push(`${files[f]}`);
-        }
+      for (let f in files) {
+        fileArr.push(`${f}`);
       }
       return fileArr;
     }
   }
 }
 
-async function getDirectoryFiles(dir: string): Promise<string[]> {
-  let inPath = path.join(__dirname, `../${dir}`);
-  return fs.promises.readdir(inPath);
-}
-
-// compileContent() {
-//   for (let section in selected) {
-//       content += `${allSections[selected[section]]}\n`;
-//   }
-// }
-
 /**
  * Interfaces
  */
+
 interface DocumenterOptions {
   schema?: Schema;
   files?: string | string[];
   directories?: {
-    in: string | undefined;
+    in: string;
     out: string;
   };
   content: string[];

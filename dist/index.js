@@ -56,8 +56,7 @@ function run() {
                     in: 'samples'
                 },
                 content: ['main', 'code']
-            });
-            doc.render();
+            }).compile();
             return [2 /*return*/];
         });
     });

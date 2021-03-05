@@ -1,3 +1,6 @@
+import { promises as fs } from 'fs';
+import * as path from 'path';
+
 /**
  * Helper RegExp functions
  */
@@ -16,6 +19,14 @@ export function parseObj(str: string): any {
   }
 
   return result;
+}
+
+export async function renderFile(content: string, dir: string, fileName: string) {
+  let outPath = path.join(__dirname, `../${dir}`);
+  fs.mkdir(outPath, { recursive: true }).then((val) => {
+    let str = getFileName(fileName);
+    return fs.writeFile(outPath + `/${str}`, content, { flag: 'w' });
+  });
 }
 
 export function toPosBehind(str: string): string {

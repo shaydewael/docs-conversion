@@ -61,79 +61,72 @@ var helpers_1 = require("./helpers");
 var Documenter = /** @class */ (function () {
     function Documenter(_a) {
         var _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
-            in: undefined,
-            out: '.',
+            in: '',
+            out: '',
         } : _c, _d = _a.content, content = _d === void 0 ? [] : _d, _e = _a.files, files = _e === void 0 ? '' : _e;
-        //TODO
         this.schema = schema;
-        this.directories = directories;
+        this.directories = directories.in ? directories : { in: '', out: directories.out };
         this.content = content;
-        // TODO: probs just handle this in render()
-        this.files = this.compileFiles(files);
+        if (typeof files === 'string')
+            files = [files];
+        this.files = files;
     }
-    Documenter.prototype.render = function () {
+    Documenter.prototype.compile = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var files, _loop_1, f;
+            var files, _loop_1, this_1, f;
             var _this = this;
             return __generator(this, function (_a) {
-                files = this.files;
-                if (!files)
-                    return [2 /*return*/];
-                _loop_1 = function (f) {
-                    var renderedContent = '';
-                    var fileName = files[f];
-                    var pathIn = path.resolve(__dirname, fileName);
-                    try {
-                        fs.readFile(pathIn, 'utf-8', function (err, data) {
-                            if (err)
-                                throw new Error("Failed to access defined file: " + pathIn);
-                            var _a = _this.schema.apply(data), _ = _a._, sections = _a.sections;
-                            if (!sections)
-                                throw new Error('Invalid content');
-                            var _loop_2 = function (c) {
-                                renderedContent += sections[_this.content[c]] + "\n";
-                                var outPath = path.join(__dirname, "../" + _this.directories.out);
-                                fs.promises.mkdir(outPath, { recursive: true }).then(function (val) {
-                                    var str = helpers_1.getFileName(fileName);
-                                    fs.promises.writeFile(outPath + ("/" + str + ".md"), renderedContent, { flag: 'w' });
+                switch (_a.label) {
+                    case 0:
+                        if (!this.files)
+                            return [2 /*return*/];
+                        return [4 /*yield*/, this.fetchFiles(this.files)];
+                    case 1:
+                        files = _a.sent();
+                        _loop_1 = function (f) {
+                            var renderedContent = '';
+                            var fileName = files[f];
+                            var pathIn = path.resolve(__dirname, '../', this_1.directories.in, fileName);
+                            try {
+                                fs.readFile(pathIn, 'utf-8', function (err, data) {
+                                    if (err)
+                                        throw new Error("Failed to access defined file: " + pathIn);
+                                    var _a = _this.schema.apply(data), _ = _a._, sections = _a.sections;
+                                    if (!sections)
+                                        throw new Error('Invalid content');
+                                    for (var c in _this.content) {
+                                        renderedContent += sections[_this.content[c]] + "\n";
+                                        helpers_1.renderFile(renderedContent, _this.directories.out, fileName);
+                                    }
                                 });
-                            };
-                            for (var c in _this.content) {
-                                _loop_2(c);
                             }
-                        });
-                    }
-                    catch (err) {
-                        console.error("ERROR: " + err);
-                    }
-                };
-                for (f in files) {
-                    _loop_1(f);
+                            catch (err) {
+                                console.error("ERROR: " + err);
+                            }
+                        };
+                        this_1 = this;
+                        for (f in files) {
+                            _loop_1(f);
+                        }
+                        return [2 /*return*/];
                 }
-                return [2 /*return*/];
             });
         });
     };
-    Documenter.prototype.compileFiles = function (files) {
+    Documenter.prototype.fetchFiles = function (files) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileArr, f, f;
+            var fileArr, inPath, f;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         fileArr = [];
-                        if (!this.directories.in) return [3 /*break*/, 2];
-                        return [4 /*yield*/, getDirectoryFiles(this.directories.in)];
-                    case 1:
-                        f = _a.sent();
-                        return [2 /*return*/, f];
+                        if (!(this.directories.in !== '')) return [3 /*break*/, 2];
+                        inPath = path.join(__dirname, "../" + this.directories.in);
+                        return [4 /*yield*/, fs.promises.readdir(inPath)];
+                    case 1: return [2 /*return*/, _a.sent()];
                     case 2:
-                        if (typeof files === 'string') {
-                            fileArr.push("" + files);
-                        }
-                        else {
-                            for (f in files) {
-                                fileArr.push("" + files[f]);
-                            }
+                        for (f in files) {
+                            fileArr.push("" + f);
                         }
                         return [2 /*return*/, fileArr];
                 }
@@ -143,12 +136,3 @@ var Documenter = /** @class */ (function () {
     return Documenter;
 }());
 exports.default = Documenter;
-function getDirectoryFiles(dir) {
-    return __awaiter(this, void 0, void 0, function () {
-        var inPath;
-        return __generator(this, function (_a) {
-            inPath = path.join(__dirname, "../" + dir);
-            return [2 /*return*/, fs.promises.readdir(inPath)];
-        });
-    });
-}

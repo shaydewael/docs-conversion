@@ -18,9 +18,8 @@ async function run() {
             in: 'samples'
         },
         content: [ 'main', 'code' ]
-    });
+    }).compile();
 
-    doc.render();   
 }
 
 run();
