@@ -42,5 +42,9 @@ export function getFileName(str: string): string {
   return filter ? filter[1] : str;
 }
 
+// export function getDiv(div: string): string {
+
+// }
+
 export const lb = "[\\r\\n]?";
 export const coreGroup = "(.|[\\r\\n])+?";

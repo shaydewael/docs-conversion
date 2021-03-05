@@ -103,5 +103,7 @@ function getFileName(str) {
     return filter ? filter[1] : str;
 }
 exports.getFileName = getFileName;
+// export function getDiv(div: string): string {
+// }
 exports.lb = "[\\r\\n]?";
 exports.coreGroup = "(.|[\\r\\n])+?";

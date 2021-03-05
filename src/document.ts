@@ -1,10 +1,9 @@
-import { create } from 'domain';
-import { default as Schema } from './schema';
 import * as path from 'path';
 import * as fs from 'fs';
+import { default as Schema } from './schema';
 import { renderFile } from './helpers';
 
-export default class Documenter {
+export default class Document {
   public schema: Schema;
   public content: string[];
   public directories: { in: string, out: string; };
@@ -18,7 +17,7 @@ export default class Documenter {
     },
     content = [],
     files = ''
-  }: DocumenterOptions) {
+  }: DocumentOptions) {
     this.schema = schema as Schema;
     this.directories = directories.in ? directories : { in: '', out: directories.out };
     this.content = content;
@@ -72,7 +71,7 @@ export default class Documenter {
  * Interfaces
  */
 
-interface DocumenterOptions {
+interface DocumentOptions {
   schema?: Schema;
   files?: string | string[];
   directories?: {

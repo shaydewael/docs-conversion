@@ -1,20 +1,22 @@
-name: 'Hello World'
-description: 'Parse docs'
+name: 'Docs conversion'
+author: 'Shay DeWael'
+description: 'Automatically parse and convert markdown files using YAML templates'
 inputs:
+  token:
+      description: 'The GITHUB_TOKEN secret'
   schema:
     description: 'Defines schema used to parse content'
     required: true
-  source:
-    description: 'Directories that contain the md files'
-    required: true
-    default: '~'
+    default: false
+  input:
+    description: 'Directories contain the .md files'
+    required: false
+    default: false
   output:
-    description: 'Directory to ouput all files'
+    description: 'Directory to ouput files'
     required: true
-    default: '~'
-outputs:
-  time:
-    description: 'The time we greeted you'
+    default: './docs-output'
+
 runs:
   using: 'node12'
-  main: 'src/index.js'
+  main: 'dist/index.js'

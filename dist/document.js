@@ -58,8 +58,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
 var helpers_1 = require("./helpers");
-var Documenter = /** @class */ (function () {
-    function Documenter(_a) {
+var Document = /** @class */ (function () {
+    function Document(_a) {
         var _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
             in: '',
             out: '',
@@ -71,7 +71,7 @@ var Documenter = /** @class */ (function () {
             files = [files];
         this.files = files;
     }
-    Documenter.prototype.compile = function () {
+    Document.prototype.compile = function () {
         return __awaiter(this, void 0, void 0, function () {
             var files, _loop_1, this_1, f;
             var _this = this;
@@ -113,7 +113,7 @@ var Documenter = /** @class */ (function () {
             });
         });
     };
-    Documenter.prototype.fetchFiles = function (files) {
+    Document.prototype.fetchFiles = function (files) {
         return __awaiter(this, void 0, void 0, function () {
             var fileArr, inPath, f;
             return __generator(this, function (_a) {
@@ -133,6 +133,6 @@ var Documenter = /** @class */ (function () {
             });
         });
     };
-    return Documenter;
+    return Document;
 }());
-exports.default = Documenter;
+exports.default = Document;
