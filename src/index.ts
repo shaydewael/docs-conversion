@@ -14,19 +14,8 @@ async function run() {
     
         const client = gh.getOctokit(token);
 
-        // let res = await client.repos.getContent({
-        //     owner: gh.context.repo.owner,
-        //     repo: gh.context.repo.repo,
-        //     path: schemaPath
-        // });
-
-        // const method = 'GET';
-        // const url = res.url;
-
         const ee = await axios.get(`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`);
         console.log(ee.data);
-
-        // console.log(ee);`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/schemaPath`);
 
         let { data } = await client.repos.getContent({
             owner: gh.context.repo.owner,
@@ -39,10 +28,20 @@ async function run() {
         const schema = new Schema({
             path: ee.data
         });
-
-        // for (let d in data) {
-
-        // }
+        
+        let files = [];
+        for (let d in data) {
+            files.push(data) // THIS IS WHERE U LEFT OFF
+            const doc = new Document({
+                schema: schema,
+                // files: ['../samples/doc1.md', '../samples/doc2.md'],
+                directories: {
+                    out: 'compiled',
+                    in: in_dir
+                },
+                content: [ 'main', 'code' ]
+            }).compile();
+        }
 
 
         // Define the template
@@ -50,15 +49,15 @@ async function run() {
         //     path: schemaPath,
         // });
     
-        // const doc = new Document({
-        //     schema: schema,
-        //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
-        //     directories: {
-        //         out: 'compiled',
-        //         in: 'samples'
-        //     },
-        //     content: [ 'main', 'code' ]
-        // }).compile();
+        const doc = new Document({
+            schema: schema,
+            // files: ['../samples/doc1.md', '../samples/doc2.md'],
+            directories: {
+                out: 'compiled',
+                in: 'samples'
+            },
+            content: [ 'main', 'code' ]
+        }).compile();
     } catch (e) {
         console.error(e);
     }
