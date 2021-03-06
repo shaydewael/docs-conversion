@@ -29,6 +29,7 @@ async function run() {
             path: `https://api.github.com/repos/`
                 + `${gh.context.repo.owner}`
                 + `/${gh.context.repo.repo}`
+                + `/main`
                 + `/${schemaPath}`
         });
 

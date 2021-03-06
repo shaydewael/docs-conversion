@@ -83,6 +83,7 @@ function run() {
                         path: "https://api.github.com/repos/"
                             + ("" + gh.context.repo.owner)
                             + ("/" + gh.context.repo.repo)
+                            + "/main"
                             + ("/" + schemaPath)
                     });
                     return [3 /*break*/, 3];
