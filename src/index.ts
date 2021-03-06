@@ -12,13 +12,13 @@ async function run() {
     
         const client = gh.getOctokit(token);
 
-        const { data } = await client.repos.getContent({
+        const data = await client.repos.getContent({
             owner: gh.context.repo.owner,
             repo: gh.context.repo.repo,
             path: in_dir
         });
 
-        console.log(typeof data);        
+        console.log(data);        
         // Define the template
         // const schema = new Schema({
         //     path: schemaPath,
