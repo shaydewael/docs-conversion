@@ -18,7 +18,7 @@ async function run() {
             path: in_dir
         });
 
-        console.log(data)
+        console.log(data[0])
 
         // Define the template
         // const schema = new Schema({
