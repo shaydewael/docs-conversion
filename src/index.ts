@@ -6,7 +6,7 @@ import { default as Document } from './document';
 async function run() {
     try {
         const token = core.getInput('repo-token', { required: true });
-        // const schemaPath = core.getInput('schema', { required: true });
+        const schemaPath = core.getInput('schema', { required: true });
         // const out_dir = core.getInput('output', { required: true });
         const in_dir = core.getInput('input', { required: true });
     
@@ -18,7 +18,14 @@ async function run() {
             path: in_dir
         });
 
-        console.log(data[0])
+        const schema = new Schema({
+            path: schemaPath,
+        });
+
+        for (let d in data) {
+
+        }
+
 
         // Define the template
         // const schema = new Schema({
