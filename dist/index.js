@@ -79,6 +79,12 @@ function run() {
                         })];
                 case 1:
                     data = (_a.sent()).data;
+                    // let s = await client.repos.getContent({
+                    //     owner: gh.context.repo.owner,
+                    //     repo: gh.context.repo.repo,
+                    //     path: schemaPath
+                    // });
+                    console.log("https://api.github.com/repos/\n        " + gh.context.repo.owner + "/\n        " + gh.context.repo.repo + "/\n        " + schemaPath);
                     schema = new schema_1.default({
                         path: "https://api.github.com/repos/\n                " + gh.context.repo.owner + "/\n                " + gh.context.repo.repo + "/\n                " + schemaPath
                     });

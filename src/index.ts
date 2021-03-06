@@ -25,6 +25,10 @@ async function run() {
         //     path: schemaPath
         // });
 
+        console.log(`https://api.github.com/repos/
+        ${gh.context.repo.owner}/
+        ${gh.context.repo.repo}/
+        ${schemaPath}`)
         const schema = new Schema({
             path: `https://api.github.com/repos/
                 ${gh.context.repo.owner}/
