@@ -74,8 +74,7 @@ function run() {
                         })];
                 case 1:
                     data = (_a.sent()).data;
-                    console.log(typeof data);
-                    console.log(typeof data['content']);
+                    console.log(data);
                     return [3 /*break*/, 3];
                 case 2:
                     e_1 = _a.sent();
