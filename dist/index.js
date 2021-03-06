@@ -61,26 +61,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core = __importStar(require("@actions/core"));
 var gh = __importStar(require("@actions/github"));
 var schema_1 = __importDefault(require("./schema"));
+var axios_1 = __importDefault(require("axios"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var token, schemaPath, in_dir, client, res, ugh, data, schema, e_1;
+        var token, schemaPath, out_dir, in_dir, client, ee, data, schema, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
                     token = core.getInput('repo-token', { required: true });
                     schemaPath = core.getInput('schema', { required: true });
+                    out_dir = core.getInput('output', { required: true });
                     in_dir = core.getInput('input', { required: true });
                     client = gh.getOctokit(token);
-                    return [4 /*yield*/, client.repos.getContent({
-                            owner: gh.context.repo.owner,
-                            repo: gh.context.repo.repo,
-                            path: schemaPath
-                        })];
+                    return [4 /*yield*/, axios_1.default.get("https://raw.githubusercontent.com/" + gh.context.repo.owner + "/" + gh.context.repo.repo + "/main/" + schemaPath)];
                 case 1:
-                    res = _a.sent();
-                    ugh = res.url;
-                    console.log(res);
+                    ee = _a.sent();
+                    console.log(ee.data);
                     return [4 /*yield*/, client.repos.getContent({
                             owner: gh.context.repo.owner,
                             repo: gh.context.repo.repo,
@@ -88,8 +85,9 @@ function run() {
                         })];
                 case 2:
                     data = (_a.sent()).data;
+                    console.log(data);
                     schema = new schema_1.default({
-                        path: ugh
+                        path: ee.data
                     });
                     return [3 /*break*/, 4];
                 case 3:
