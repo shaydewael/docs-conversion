@@ -12,13 +12,12 @@ async function run() {
     
         const client = gh.getOctokit(token);
 
-        let data = await client.repos.getContent({
+        let { data } = await client.repos.getContent({
             owner: gh.context.repo.owner,
             repo: gh.context.repo.repo,
             path: in_dir
         });
 
-        console.log(data);
 
         // let s = await client.repos.getContent({
         //     owner: gh.context.repo.owner,
@@ -26,9 +25,12 @@ async function run() {
         //     path: schemaPath
         // });
 
-        // const schema = new Schema({
-        //     path: in_dir + schemaPath,
-        // });
+        const schema = new Schema({
+            path: `https://api.github.com/repos/
+                ${gh.context.repo.owner}/
+                ${gh.context.repo.repo}/
+                ${schemaPath}`
+        });
 
         // for (let d in data) {
 

@@ -21,7 +21,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var yaml = __importStar(require("js-yaml"));
 var fs = __importStar(require("fs"));
-var path = __importStar(require("path"));
 var helpers_1 = require("./helpers");
 var Schema = /** @class */ (function () {
     function Schema(opts) {
@@ -32,8 +31,8 @@ var Schema = /** @class */ (function () {
     Schema.prototype.parse = function (schemaPath) {
         try {
             // TODO: should this be handled by user?
-            var p = path.resolve(__dirname, schemaPath);
-            var s = yaml.load(fs.readFileSync(p, 'utf8'));
+            // let p = path.resolve(__dirname, schemaPath);
+            var s = yaml.load(fs.readFileSync(schemaPath, 'utf8'));
             if (!s["sections"])
                 throw new Error("Invalid schema. Sections must exist");
             return {

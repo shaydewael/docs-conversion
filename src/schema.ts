@@ -22,8 +22,8 @@ export default class Schema {
   parse(schemaPath: string): any {
     try {
       // TODO: should this be handled by user?
-      let p = path.resolve(__dirname, schemaPath);
-      const s: any = yaml.load(fs.readFileSync(p, 'utf8'));
+      // let p = path.resolve(__dirname, schemaPath);
+      const s: any = yaml.load(fs.readFileSync(schemaPath, 'utf8'));
       if (!s["sections"]) throw new Error("Invalid schema. Sections must exist");
 
       return {
