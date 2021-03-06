@@ -75,6 +75,7 @@ function run() {
                         })];
                 case 1:
                     data = _a.sent();
+                    console.log(data);
                     return [3 /*break*/, 3];
                 case 2:
                     e_1 = _a.sent();
