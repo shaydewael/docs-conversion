@@ -19,7 +19,7 @@ async function run() {
         });
 
         console.log(typeof data)
-        console.log(typeof data[0].content)
+        console.log(typeof data['content'])
 
         // Define the template
         // const schema = new Schema({
