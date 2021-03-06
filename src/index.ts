@@ -26,7 +26,7 @@ async function run() {
         // });
 
         const schema = new Schema({
-            path: `https://api.github.com/repos/`
+            path: `https://raw.githubusercontent.com/`
                 + `${gh.context.repo.owner}`
                 + `/${gh.context.repo.repo}`
                 + `/main`

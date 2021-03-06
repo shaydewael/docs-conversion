@@ -80,7 +80,7 @@ function run() {
                 case 1:
                     data = (_a.sent()).data;
                     schema = new schema_1.default({
-                        path: "https://api.github.com/repos/"
+                        path: "https://raw.githubusercontent.com/"
                             + ("" + gh.context.repo.owner)
                             + ("/" + gh.context.repo.repo)
                             + "/main"
