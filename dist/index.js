@@ -63,11 +63,11 @@ var gh = __importStar(require("@actions/github"));
 var schema_1 = __importDefault(require("./schema"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var token, schemaPath, in_dir, client, data, schema, e_1;
+        var token, schemaPath, in_dir, client, res, ugh, data, schema, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 3, , 4]);
                     token = core.getInput('repo-token', { required: true });
                     schemaPath = core.getInput('schema', { required: true });
                     in_dir = core.getInput('input', { required: true });
@@ -75,23 +75,28 @@ function run() {
                     return [4 /*yield*/, client.repos.getContent({
                             owner: gh.context.repo.owner,
                             repo: gh.context.repo.repo,
-                            path: in_dir
+                            path: schemaPath
                         })];
                 case 1:
+                    res = _a.sent();
+                    ugh = res.url;
+                    console.log(res);
+                    return [4 /*yield*/, client.repos.getContent({
+                            owner: gh.context.repo.owner,
+                            repo: gh.context.repo.repo,
+                            path: in_dir
+                        })];
+                case 2:
                     data = (_a.sent()).data;
                     schema = new schema_1.default({
-                        path: "https://raw.githubusercontent.com/"
-                            + ("" + gh.context.repo.owner)
-                            + ("/" + gh.context.repo.repo)
-                            + "/main"
-                            + ("/" + schemaPath)
+                        path: ugh
                     });
-                    return [3 /*break*/, 3];
-                case 2:
+                    return [3 /*break*/, 4];
+                case 3:
                     e_1 = _a.sent();
                     console.error(e_1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     });
