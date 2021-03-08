@@ -54,13 +54,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
-var github_1 = __importDefault(require("@actions/github"));
 var Document = /** @class */ (function () {
     function Document(_a) {
         var client = _a.client, files = _a.files, _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
@@ -76,17 +72,18 @@ var Document = /** @class */ (function () {
         this.files = this.files ? this.files : [];
     }
     Document.prototype.fetchDirectory = function (path) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
             var data, d;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0: return [4 /*yield*/, this.client.repos.getContent({
-                            owner: github_1.default.context.repo.owner,
-                            repo: github_1.default.context.repo.repo,
+                            owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
+                            repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
                             path: path
                         })];
                     case 1:
-                        data = (_a.sent()).data;
+                        data = (_c.sent()).data;
                         for (d in data) {
                             console.log(d);
                             // this.files?.push(d["down"]);

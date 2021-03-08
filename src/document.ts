@@ -35,8 +35,8 @@ export default class Document {
 
   private async fetchDirectory(path: string) {
     let { data } = await this.client.repos.getContent({
-      owner: gh.context.repo.owner,
-      repo: gh.context.repo.repo,
+      owner: this.schema.githubMetadata?.owner,
+      repo: this.schema.githubMetadata?.repo,
       path: path
     });
 
