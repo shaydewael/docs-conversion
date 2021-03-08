@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -40,6 +59,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseSchema = void 0;
+var yaml = __importStar(require("js-yaml"));
 var axios_1 = __importDefault(require("axios"));
 var helpers_1 = require("./helpers");
 var Schema = /** @class */ (function () {
@@ -105,7 +125,7 @@ function getSection(text, capture, flags) {
 }
 function parseSchema(schemaPath) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, e_1;
+        var data, parsedData, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -114,11 +134,12 @@ function parseSchema(schemaPath) {
                 case 1:
                     data = (_a.sent()).data;
                     console.log(data);
-                    if (!data["sections"])
+                    parsedData = yaml.load(data);
+                    if (!parsedData["sections"])
                         throw new Error("Invalid schema. Sections must exist");
                     return [2 /*return*/, {
-                            metadata: data['metadata'],
-                            sections: data['sections']
+                            metadata: parsedData['metadata'],
+                            sections: parsedData['sections']
                         }];
                 case 2:
                     e_1 = _a.sent();

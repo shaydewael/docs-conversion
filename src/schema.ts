@@ -78,12 +78,13 @@ export async function parseSchema(schemaPath: string): Promise<SchemaOptions> {
     // let p = path.resolve(__dirname, schemaPath);
     const { data } = await axios.get(schemaPath);
     console.log(data);
+    const parsedData: any = yaml.load(data);
 
-    if (!data["sections"]) throw new Error("Invalid schema. Sections must exist");
+    if (!parsedData["sections"]) throw new Error("Invalid schema. Sections must exist");
 
     return {
-      metadata: data['metadata'],
-      sections: data['sections']
+      metadata: parsedData['metadata'],
+      sections: parsedData['sections']
     };
   } catch (e) {
     return Promise.reject(e);
