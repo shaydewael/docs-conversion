@@ -60,14 +60,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = __importStar(require("@actions/core"));
 var gh = __importStar(require("@actions/github"));
+var schema_1 = __importStar(require("./schema"));
 var axios_1 = __importDefault(require("axios"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var token, schemaPath, out_dir, in_dir, client, ee, data, files, d, e_1;
+        var token, schemaPath, out_dir, in_dir, client, ee, data, schemaContent, schema, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 4, , 5]);
                     token = core.getInput('repo-token', { required: true });
                     schemaPath = core.getInput('schema', { required: true });
                     out_dir = core.getInput('output', { required: true });
@@ -85,26 +86,17 @@ function run() {
                 case 2:
                     data = (_a.sent()).data;
                     console.log(data);
-                    files = [];
-                    for (d in data) {
-                        files.push(data); // THIS IS WHERE U LEFT OFF
-                        console.log(files);
-                        // const doc = new Document({
-                        //     schema: schema,
-                        //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
-                        //     directories: {
-                        //         out: 'compiled',
-                        //         in: in_dir
-                        //     },
-                        //     content: [ 'main', 'code' ]
-                        // }).compile();
-                    }
-                    return [3 /*break*/, 4];
+                    return [4 /*yield*/, schema_1.parseSchema("https://raw.githubusercontent.com/" + gh.context.repo.owner + "/" + gh.context.repo.repo + "/main/" + schemaPath)];
                 case 3:
+                    schemaContent = _a.sent();
+                    schema = new schema_1.default(schemaContent);
+                    console.log(schemaContent);
+                    return [3 /*break*/, 5];
+                case 4:
                     e_1 = _a.sent();
                     console.error(e_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     });

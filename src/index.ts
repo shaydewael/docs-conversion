@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as gh from '@actions/github';
 import * as fs from 'fs';
-import { default as Schema } from './schema';
+import { default as Schema, parseSchema } from './schema';
 import { default as Document } from './document';
 import axios from 'axios';
 
@@ -24,23 +24,23 @@ async function run() {
         });
 
         console.log(data);
-
-        // const schema = new Schema(ee.data);
-        
-        let files = [];
-        for (let d in data) {
-            files.push(data) // THIS IS WHERE U LEFT OFF
-            console.log(files);
-            // const doc = new Document({
-            //     schema: schema,
-            //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
-            //     directories: {
-            //         out: 'compiled',
-            //         in: in_dir
-            //     },
-            //     content: [ 'main', 'code' ]
-            // }).compile();
-        }
+        const schemaContent = await parseSchema(`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`)
+        const schema = new Schema(schemaContent);
+        console.log(schemaContent);
+        // let files = [];
+        // for (let d in data) {
+        //     files.push(d) // THIS IS WHERE U LEFT OFF
+        //     console.log(files);
+        //     const doc = new Document({
+        //         schema: ee.data,
+        //         // files: ['../samples/doc1.md', '../samples/doc2.md'],
+        //         directories: {
+        //             out: 'compiled',
+        //             in: in_dir
+        //         },
+        //         content: [ 'main', 'code' ]
+        //     }).compile();
+        // }
 
 
         // Define the template

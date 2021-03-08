@@ -1,6 +1,7 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 import {
   lb,
   toPosAhead, 
@@ -13,28 +14,8 @@ export default class Schema {
   public sections: { [key: string]: SchemaSection };
 
   constructor(opts: SchemaOptions) {
-      let { metadata, sections } = this.parse(opts.path);
-
-      this.metadata = metadata;
-      this.sections = sections;
-  }
-
-  parse(schemaPath: string): any {
-    try {
-      // TODO: should this be handled by user?
-      // let p = path.resolve(__dirname, schemaPath);
-      // const ee = await axios.get(schemaPath);
-      const s: any = yaml.load(fs.readFileSync(schemaPath, 'utf8'));
-      if (!s["sections"]) throw new Error("Invalid schema. Sections must exist");
-
-      return {
-        metadata: s['metadata'],
-        sections: s['sections']
-      };
-    } catch (e) {
-      console.log(`ERROR: ${e}`);
-      return;
-    }
+      this.metadata = opts.metadata;
+      this.sections = opts.sections;
   }
 
   // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
@@ -91,11 +72,29 @@ function getSection(text: string, capture: string, flags: string = ''): string |
   } else { return; }
 }
 
+export async function parseSchema(schemaPath: string): Promise<SchemaOptions> {
+  try {
+    // TODO: should this be handled by user?
+    // let p = path.resolve(__dirname, schemaPath);
+    const { data } = await axios.get(schemaPath);
+
+    if (!data["sections"]) throw new Error("Invalid schema. Sections must exist");
+
+    return {
+      metadata: data['metadata'],
+      sections: data['sections']
+    };
+  } catch (e) {
+    return Promise.reject(e);
+  }
+}
+
 /**
  * Interfaces
  */
 interface SchemaOptions {
-  path: string;
+  metadata: SchemaSection | undefined;
+  sections: { [key: string]: SchemaSection };
 }
 
 export interface SchemaSection extends BaseSection {
