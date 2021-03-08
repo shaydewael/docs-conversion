@@ -85,7 +85,6 @@ var Document = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.fetchFiles(this.files)];
                     case 1:
                         files = _d.sent();
-                        console.log(files);
                         _a = [];
                         for (_b in files)
                             _a.push(_b);
@@ -96,22 +95,21 @@ var Document = /** @class */ (function () {
                         f = _a[_i];
                         renderedContent = '';
                         fileName = files[f];
-                        console.log(fileName);
                         _d.label = 3;
                     case 3:
                         _d.trys.push([3, 5, , 6]);
                         return [4 /*yield*/, axios_1.default.get(files[f])];
                     case 4:
                         data = (_d.sent()).data;
-                        console.log(data);
                         _c = this.schema.apply(data), _ = _c._, sections = _c.sections;
                         if (!sections)
                             throw new Error('Invalid content');
                         for (c in this.content) {
                             renderedContent += sections[this.content[c]] + "\n";
-                            console.log(renderedContent);
+                            // console.log(renderedContent);
                             // renderFile(renderedContent, this.directories.out, fileName);
                         }
+                        console.log(renderedContent);
                         return [3 /*break*/, 6];
                     case 5:
                         err_1 = _d.sent();

@@ -50,28 +50,29 @@ export default class Document {
   public async compile() {
     // const dir = await this.fetchDirectory(this.directories.in);
     const files = await this.fetchFiles(this.files);
-    console.log(files);
+    // console.log(files);
     
     for (let f in files) {
       let renderedContent = '';
       let fileName = files[f];
-      console.log(fileName);
+      // console.log(fileName);
       // let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
       
       try {
         // fs.readFile(pathIn, 'utf-8', (err, data) => {
         //   if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
         const { data } = await axios.get(files[f]);
-        console.log(data);
+        // console.log(data);
 
         let { _, sections } = this.schema.apply(data);
         if (!sections) throw new Error('Invalid content');
 
         for (let c in this.content) {
           renderedContent += `${sections[this.content[c]]}\n`;
-          console.log(renderedContent);
+          // console.log(renderedContent);
           // renderFile(renderedContent, this.directories.out, fileName);
         }
+        console.log(renderedContent);
         // });
         
 
