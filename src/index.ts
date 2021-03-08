@@ -15,7 +15,7 @@ async function run() {
         const client = gh.getOctokit(token);
 
         const ee = await axios.get(`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`);
-        console.log(ee.data);
+        console.log(typeof ee.data);
 
         let { data } = await client.repos.getContent({
             owner: gh.context.repo.owner,
@@ -25,9 +25,7 @@ async function run() {
 
         console.log(data);
 
-        const schema = new Schema({
-            path: ee.data
-        });
+        // const schema = new Schema(ee.data);
         
         let files = [];
         for (let d in data) {
@@ -50,15 +48,15 @@ async function run() {
         //     path: schemaPath,
         // });
     
-        const doc = new Document({
-            schema: schema,
-            // files: ['../samples/doc1.md', '../samples/doc2.md'],
-            directories: {
-                out: 'compiled',
-                in: 'samples'
-            },
-            content: [ 'main', 'code' ]
-        }).compile();
+    //     const doc = new Document({
+    //         schema: schema,
+    //         // files: ['../samples/doc1.md', '../samples/doc2.md'],
+    //         directories: {
+    //             out: 'compiled',
+    //             in: 'samples'
+    //         },
+    //         content: [ 'main', 'code' ]
+    //     }).compile();
     } catch (e) {
         console.error(e);
     }

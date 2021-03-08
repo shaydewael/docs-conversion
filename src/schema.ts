@@ -23,6 +23,7 @@ export default class Schema {
     try {
       // TODO: should this be handled by user?
       // let p = path.resolve(__dirname, schemaPath);
+      // const ee = await axios.get(schemaPath);
       const s: any = yaml.load(fs.readFileSync(schemaPath, 'utf8'));
       if (!s["sections"]) throw new Error("Invalid schema. Sections must exist");
 
