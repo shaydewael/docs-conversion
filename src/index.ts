@@ -32,15 +32,16 @@ async function run() {
         let files = [];
         for (let d in data) {
             files.push(data) // THIS IS WHERE U LEFT OFF
-            const doc = new Document({
-                schema: schema,
-                // files: ['../samples/doc1.md', '../samples/doc2.md'],
-                directories: {
-                    out: 'compiled',
-                    in: in_dir
-                },
-                content: [ 'main', 'code' ]
-            }).compile();
+            console.log(files);
+            // const doc = new Document({
+            //     schema: schema,
+            //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
+            //     directories: {
+            //         out: 'compiled',
+            //         in: in_dir
+            //     },
+            //     content: [ 'main', 'code' ]
+            // }).compile();
         }
 
 

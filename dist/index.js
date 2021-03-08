@@ -65,7 +65,7 @@ var document_1 = __importDefault(require("./document"));
 var axios_1 = __importDefault(require("axios"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var token, schemaPath, out_dir, in_dir, client, ee, data, schema, files, d, doc_1, doc, e_1;
+        var token, schemaPath, out_dir, in_dir, client, ee, data, schema, files, d, doc, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -93,15 +93,16 @@ function run() {
                     files = [];
                     for (d in data) {
                         files.push(data); // THIS IS WHERE U LEFT OFF
-                        doc_1 = new document_1.default({
-                            schema: schema,
-                            // files: ['../samples/doc1.md', '../samples/doc2.md'],
-                            directories: {
-                                out: 'compiled',
-                                in: in_dir
-                            },
-                            content: ['main', 'code']
-                        }).compile();
+                        console.log(files);
+                        // const doc = new Document({
+                        //     schema: schema,
+                        //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
+                        //     directories: {
+                        //         out: 'compiled',
+                        //         in: in_dir
+                        //     },
+                        //     content: [ 'main', 'code' ]
+                        // }).compile();
                     }
                     doc = new document_1.default({
                         schema: schema,
