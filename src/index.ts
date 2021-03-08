@@ -23,7 +23,7 @@ async function run() {
             path: in_dir
         });
 
-        console.log(data);
+        // console.log(data);
         const schemaContent = await parseSchema(`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`)
         const schema = new Schema(schemaContent);
         console.log(schemaContent);

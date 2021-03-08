@@ -77,6 +77,7 @@ export async function parseSchema(schemaPath: string): Promise<SchemaOptions> {
     // TODO: should this be handled by user?
     // let p = path.resolve(__dirname, schemaPath);
     const { data } = await axios.get(schemaPath);
+    console.log(data);
 
     if (!data["sections"]) throw new Error("Invalid schema. Sections must exist");
 

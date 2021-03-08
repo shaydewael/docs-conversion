@@ -113,6 +113,7 @@ function parseSchema(schemaPath) {
                     return [4 /*yield*/, axios_1.default.get(schemaPath)];
                 case 1:
                     data = (_a.sent()).data;
+                    console.log(data);
                     if (!data["sections"])
                         throw new Error("Invalid schema. Sections must exist");
                     return [2 /*return*/, {

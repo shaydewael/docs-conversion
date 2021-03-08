@@ -85,7 +85,6 @@ function run() {
                         })];
                 case 2:
                     data = (_a.sent()).data;
-                    console.log(data);
                     return [4 /*yield*/, schema_1.parseSchema("https://raw.githubusercontent.com/" + gh.context.repo.owner + "/" + gh.context.repo.repo + "/main/" + schemaPath)];
                 case 3:
                     schemaContent = _a.sent();
