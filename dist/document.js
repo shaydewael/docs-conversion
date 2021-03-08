@@ -55,22 +55,24 @@ var Document = /** @class */ (function () {
         this.files = this.files ? this.files : [];
     }
     Document.prototype.fetchDirectory = function (path) {
-        var _a, _b, _c;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var data, d;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0: return [4 /*yield*/, this.client.repos.getContent({
-                            owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
-                            repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
-                            path: path
-                        })];
+            var files, data, d;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        files = [];
+                        return [4 /*yield*/, this.client.repos.getContent({
+                                owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
+                                repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
+                                path: path
+                            })];
                     case 1:
-                        data = (_d.sent()).data;
+                        data = (_c.sent()).data;
                         for (d in data) {
-                            (_c = this.files) === null || _c === void 0 ? void 0 : _c.push(data[d].download_url);
+                            files.push(data[d].download_url);
                         }
-                        return [2 /*return*/, data];
+                        return [2 /*return*/, files];
                 }
             });
         });
@@ -83,6 +85,7 @@ var Document = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.fetchFiles(this.files)];
                     case 1:
                         files = _d.sent();
+                        console.log(files);
                         _a = [];
                         for (_b in files)
                             _a.push(_b);
@@ -93,6 +96,7 @@ var Document = /** @class */ (function () {
                         f = _a[_i];
                         renderedContent = '';
                         fileName = files[f];
+                        console.log(fileName);
                         _d.label = 3;
                     case 3:
                         _d.trys.push([3, 5, , 6]);

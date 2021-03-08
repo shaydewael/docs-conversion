@@ -34,6 +34,7 @@ export default class Document {
   }
 
   private async fetchDirectory(path: string) {
+    const files = [];
     let { data } = await this.client.repos.getContent({
       owner: this.schema.githubMetadata?.owner,
       repo: this.schema.githubMetadata?.repo,
@@ -41,18 +42,20 @@ export default class Document {
     });
 
     for (let d in data) {
-      this.files?.push(data[d].download_url);
+      files.push(data[d].download_url);
     }
-    return data;
+    return files;
   }
 
   public async compile() {
     // const dir = await this.fetchDirectory(this.directories.in);
     const files = await this.fetchFiles(this.files);
+    console.log(files);
     
     for (let f in files) {
       let renderedContent = '';
       let fileName = files[f];
+      console.log(fileName);
       // let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
       
       try {
