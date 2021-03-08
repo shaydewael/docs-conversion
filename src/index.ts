@@ -29,20 +29,31 @@ async function run() {
             { owner: gh.context.repo.owner, repo: gh.context.repo.repo})
         const schema = new Schema(schemaContent);
 
+        const doc = new Document({
+            schema: schema,
+            client: client,
+            // files: ['../samples/doc1.md', '../samples/doc2.md'],
+            directories: {
+                out: 'compiled',
+                in: in_dir
+            },
+            content: [ 'main', 'code' ]
+        }).compile();
+
         // let files = [];
         // for (let d in data) {
         //     files.push(d);
         //     console.log(files);
-        //     const doc = new Document({
-        //         schema: schema,
-        //         client: client,
-        //         // files: ['../samples/doc1.md', '../samples/doc2.md'],
-        //         directories: {
-        //             out: 'compiled',
-        //             in: in_dir
-        //         },
-        //         content: [ 'main', 'code' ]
-        //     }).compile();
+        // const doc = new Document({
+        //     schema: schema,
+        //     client: client,
+        //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
+        //     directories: {
+        //         out: 'compiled',
+        //         in: in_dir
+        //     },
+        //     content: [ 'main', 'code' ]
+        // }).compile();
         // }
 
 

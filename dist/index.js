@@ -54,13 +54,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = __importStar(require("@actions/core"));
 var gh = __importStar(require("@actions/github"));
 var schema_1 = __importStar(require("./schema"));
+var document_1 = __importDefault(require("./document"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var token, schemaPath, out_dir, in_dir, client, ghUser, schemaContent, schema, e_1;
+        var token, schemaPath, out_dir, in_dir, client, ghUser, schemaContent, schema, doc, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -78,6 +82,16 @@ function run() {
                 case 1:
                     schemaContent = _a.sent();
                     schema = new schema_1.default(schemaContent);
+                    doc = new document_1.default({
+                        schema: schema,
+                        client: client,
+                        // files: ['../samples/doc1.md', '../samples/doc2.md'],
+                        directories: {
+                            out: 'compiled',
+                            in: in_dir
+                        },
+                        content: ['main', 'code']
+                    }).compile();
                     return [3 /*break*/, 3];
                 case 2:
                     e_1 = _a.sent();
