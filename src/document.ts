@@ -42,28 +42,20 @@ export default class Document {
     });
 
     for (let d in data) {
-      console.log(data[d]);
       files.push({ name: data[d].name, url: data[d].download_url });
     }
     return files;
   }
 
   public async compile() {
-    // const dir = await this.fetchDirectory(this.directories.in);
     const files = await this.fetchFiles(this.files);
-    // console.log(files);
     
     for (let f in files) {
       let renderedContent = '';
       let currentFile = files[f];
-      // console.log(fileName);
-      // let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
       
       try {
-        // fs.readFile(pathIn, 'utf-8', (err, data) => {
-        //   if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
         const { data } = await axios.get(currentFile.url);
-        // console.log(data);
 
         let { _, sections } = this.schema.apply(data);
         if (!sections) throw new Error('Invalid content');
@@ -78,13 +70,15 @@ export default class Document {
 
         renderedContent = btoa(renderedContent);
 
-        this.client.repos.putContent({
+        const res = await this.client.repos.putContent({
           owner: this.schema.githubMetadata?.owner,
           repo: this.schema.githubMetadata?.repo,
           path: `${this.directories.out}/${currentFile.name}`,
           content: renderedContent,
           message: `Document Conversion: Add ${currentFile.name}`
         });
+
+        console.log(res);
 
       } catch(err) {
         console.error(`ERROR: ${err}`);

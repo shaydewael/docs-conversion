@@ -70,7 +70,6 @@ var Document = /** @class */ (function () {
                     case 1:
                         data = (_c.sent()).data;
                         for (d in data) {
-                            console.log(data[d]);
                             files.push({ name: data[d].name, url: data[d].download_url });
                         }
                         return [2 /*return*/, files];
@@ -81,7 +80,7 @@ var Document = /** @class */ (function () {
     Document.prototype.compile = function () {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var files, _c, _d, _i, f, renderedContent, currentFile, data, _e, _, sections, c, err_1;
+            var files, _c, _d, _i, f, renderedContent, currentFile, data, _e, _, sections, c, res, err_1;
             return __generator(this, function (_f) {
                 switch (_f.label) {
                     case 0: return [4 /*yield*/, this.fetchFiles(this.files)];
@@ -93,13 +92,13 @@ var Document = /** @class */ (function () {
                         _i = 0;
                         _f.label = 2;
                     case 2:
-                        if (!(_i < _c.length)) return [3 /*break*/, 7];
+                        if (!(_i < _c.length)) return [3 /*break*/, 8];
                         f = _c[_i];
                         renderedContent = '';
                         currentFile = files[f];
                         _f.label = 3;
                     case 3:
-                        _f.trys.push([3, 5, , 6]);
+                        _f.trys.push([3, 6, , 7]);
                         return [4 /*yield*/, axios_1.default.get(currentFile.url)];
                     case 4:
                         data = (_f.sent()).data;
@@ -114,22 +113,25 @@ var Document = /** @class */ (function () {
                         // console.log(renderedContent);
                         // });
                         renderedContent = btoa(renderedContent);
-                        this.client.repos.putContent({
-                            owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
-                            repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
-                            path: this.directories.out + "/" + currentFile.name,
-                            content: renderedContent,
-                            message: "Document Conversion: Add " + currentFile.name
-                        });
-                        return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.client.repos.putContent({
+                                owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
+                                repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
+                                path: this.directories.out + "/" + currentFile.name,
+                                content: renderedContent,
+                                message: "Document Conversion: Add " + currentFile.name
+                            })];
                     case 5:
+                        res = _f.sent();
+                        console.log(res);
+                        return [3 /*break*/, 7];
+                    case 6:
                         err_1 = _f.sent();
                         console.error("ERROR: " + err_1);
-                        return [3 /*break*/, 6];
-                    case 6:
+                        return [3 /*break*/, 7];
+                    case 7:
                         _i++;
                         return [3 /*break*/, 2];
-                    case 7: return [2 /*return*/];
+                    case 8: return [2 /*return*/];
                 }
             });
         });
