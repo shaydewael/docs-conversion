@@ -68,7 +68,7 @@ export default class Document {
         // console.log(renderedContent);
         // });
 
-        renderedContent = btoa(renderedContent);
+        renderedContent = Buffer.from(renderedContent).toString('base64');
 
         const res = await this.client.repos.putContent({
           owner: this.schema.githubMetadata?.owner,
