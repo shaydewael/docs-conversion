@@ -1,4 +1,4 @@
-metadata: # Jekyll front matter
+metadata:
   start: '---'
   end: '---'
   delimiter: ':'
