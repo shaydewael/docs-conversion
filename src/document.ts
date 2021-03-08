@@ -42,6 +42,7 @@ export default class Document {
     });
 
     for (let d in data) {
+      console.log(data[d]);
       files.push(data[d].download_url);
     }
     return files;
@@ -72,8 +73,15 @@ export default class Document {
           // console.log(renderedContent);
           // renderFile(renderedContent, this.directories.out, fileName);
         }
-        console.log(renderedContent);
+        // console.log(renderedContent);
         // });
+
+        // this.client.repos.putContent({
+        //   owner: this.schema.githubMetadata?.owner,
+        //   repo: this.schema.githubMetadata?.repo,
+        //   path: this.directories.out,
+        //   message: `Document Conversion: Add ${}`
+        // })
         
 
       } catch(err) {

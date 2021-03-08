@@ -70,6 +70,7 @@ var Document = /** @class */ (function () {
                     case 1:
                         data = (_c.sent()).data;
                         for (d in data) {
+                            console.log(data[d]);
                             files.push(data[d].download_url);
                         }
                         return [2 /*return*/, files];
@@ -109,7 +110,6 @@ var Document = /** @class */ (function () {
                             // console.log(renderedContent);
                             // renderFile(renderedContent, this.directories.out, fileName);
                         }
-                        console.log(renderedContent);
                         return [3 /*break*/, 6];
                     case 5:
                         err_1 = _d.sent();
