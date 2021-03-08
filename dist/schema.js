@@ -133,7 +133,6 @@ function parseSchema(schemaPath) {
                     return [4 /*yield*/, axios_1.default.get(schemaPath)];
                 case 1:
                     data = (_a.sent()).data;
-                    console.log(data);
                     parsedData = yaml.load(data);
                     if (!parsedData["sections"])
                         throw new Error("Invalid schema. Sections must exist");
