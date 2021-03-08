@@ -85,8 +85,8 @@ var Document = /** @class */ (function () {
                     case 1:
                         data = (_c.sent()).data;
                         for (d in data) {
-                            console.log(d);
-                            // this.files?.push(d["down"]);
+                            console.log(data[d]);
+                            // this.files?.push(data[d]);
                         }
                         return [2 /*return*/, data];
                 }

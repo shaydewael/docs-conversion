@@ -41,8 +41,8 @@ export default class Document {
     });
 
     for (let d in data) {
-      console.log(d);
-      // this.files?.push(d["down"]);
+      console.log(data[d]);
+      // this.files?.push(data[d]);
     }
     return data;
   }
