@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseSchema = void 0;
+exports.parseSchemaPath = void 0;
 var yaml = __importStar(require("js-yaml"));
 var axios_1 = __importDefault(require("axios"));
 var helpers_1 = require("./helpers");
@@ -66,6 +66,7 @@ var Schema = /** @class */ (function () {
     function Schema(opts) {
         this.metadata = opts.metadata;
         this.sections = opts.sections;
+        this.githubMetadata = opts.githubOptions;
     }
     // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
     Schema.prototype.apply = function (fileContent) {
@@ -123,7 +124,7 @@ function getSection(text, capture, flags) {
         return;
     }
 }
-function parseSchema(schemaPath) {
+function parseSchemaPath(schemaPath, githubUser) {
     return __awaiter(this, void 0, void 0, function () {
         var data, parsedData, e_1;
         return __generator(this, function (_a) {
@@ -138,7 +139,8 @@ function parseSchema(schemaPath) {
                         throw new Error("Invalid schema. Sections must exist");
                     return [2 /*return*/, {
                             metadata: parsedData['metadata'],
-                            sections: parsedData['sections']
+                            sections: parsedData['sections'],
+                            githubOptions: githubUser
                         }];
                 case 2:
                     e_1 = _a.sent();
@@ -148,4 +150,4 @@ function parseSchema(schemaPath) {
         });
     });
 }
-exports.parseSchema = parseSchema;
+exports.parseSchemaPath = parseSchemaPath;

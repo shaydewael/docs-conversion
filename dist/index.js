@@ -54,48 +54,36 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = __importStar(require("@actions/core"));
 var gh = __importStar(require("@actions/github"));
 var schema_1 = __importStar(require("./schema"));
-var axios_1 = __importDefault(require("axios"));
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var token, schemaPath, out_dir, in_dir, client, ee, data, schemaContent, schema, e_1;
+        var token, schemaPath, out_dir, in_dir, client, ghUser, schemaContent, schema, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 4, , 5]);
+                    _a.trys.push([0, 2, , 3]);
                     token = core.getInput('repo-token', { required: true });
                     schemaPath = core.getInput('schema', { required: true });
                     out_dir = core.getInput('output', { required: true });
                     in_dir = core.getInput('input', { required: true });
                     client = gh.getOctokit(token);
-                    return [4 /*yield*/, axios_1.default.get("https://raw.githubusercontent.com/" + gh.context.repo.owner + "/" + gh.context.repo.repo + "/main/" + schemaPath)];
+                    ghUser = {
+                        owner: gh.context.repo.owner,
+                        repo: gh.context.repo.repo
+                    };
+                    return [4 /*yield*/, schema_1.parseSchemaPath("https://raw.githubusercontent.com/" + gh.context.repo.owner + "/" + gh.context.repo.repo + "/main/" + schemaPath, { owner: gh.context.repo.owner, repo: gh.context.repo.repo })];
                 case 1:
-                    ee = _a.sent();
-                    console.log(typeof ee.data);
-                    return [4 /*yield*/, client.repos.getContent({
-                            owner: gh.context.repo.owner,
-                            repo: gh.context.repo.repo,
-                            path: in_dir
-                        })];
-                case 2:
-                    data = (_a.sent()).data;
-                    return [4 /*yield*/, schema_1.parseSchema("https://raw.githubusercontent.com/" + gh.context.repo.owner + "/" + gh.context.repo.repo + "/main/" + schemaPath)];
-                case 3:
                     schemaContent = _a.sent();
                     schema = new schema_1.default(schemaContent);
-                    console.log(schemaContent);
-                    return [3 /*break*/, 5];
-                case 4:
+                    return [3 /*break*/, 3];
+                case 2:
                     e_1 = _a.sent();
                     console.error(e_1);
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });

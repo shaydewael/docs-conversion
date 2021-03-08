@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as gh from '@actions/github';
 import * as fs from 'fs';
-import { default as Schema, parseSchema } from './schema';
+import { default as Schema, parseSchemaPath } from './schema';
 import { default as Document } from './document';
 import axios from 'axios';
 
@@ -13,26 +13,29 @@ async function run() {
         const in_dir = core.getInput('input', { required: true });
     
         const client = gh.getOctokit(token);
-
-        const ee = await axios.get(`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`);
-        console.log(typeof ee.data);
-
-        let { data } = await client.repos.getContent({
+        const ghUser = { 
             owner: gh.context.repo.owner,
-            repo: gh.context.repo.repo,
-            path: in_dir
-        });
+            repo: gh.context.repo.repo
+        };
 
-        // console.log(data);
-        const schemaContent = await parseSchema(`https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`)
+        // let { data } = await client.repos.getContent({
+        //     owner: gh.context.repo.owner,
+        //     repo: gh.context.repo.repo,
+        //     path: in_dir
+        // });
+
+        const schemaContent = await parseSchemaPath(
+            `https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`,
+            { owner: gh.context.repo.owner, repo: gh.context.repo.repo})
         const schema = new Schema(schemaContent);
-        console.log(schemaContent);
+
         // let files = [];
         // for (let d in data) {
-        //     files.push(d) // THIS IS WHERE U LEFT OFF
+        //     files.push(d);
         //     console.log(files);
         //     const doc = new Document({
-        //         schema: ee.data,
+        //         schema: schema,
+        //         client: client,
         //         // files: ['../samples/doc1.md', '../samples/doc2.md'],
         //         directories: {
         //             out: 'compiled',

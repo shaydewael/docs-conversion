@@ -54,60 +54,59 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
-var helpers_1 = require("./helpers");
+var github_1 = __importDefault(require("@actions/github"));
 var Document = /** @class */ (function () {
     function Document(_a) {
-        var _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
+        var client = _a.client, files = _a.files, _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
             in: '',
             out: '',
-        } : _c, _d = _a.content, content = _d === void 0 ? [] : _d, _e = _a.files, files = _e === void 0 ? '' : _e;
+        } : _c, _d = _a.content, content = _d === void 0 ? [] : _d;
         this.schema = schema;
+        this.client = client;
         this.directories = directories.in ? directories : { in: '', out: directories.out };
         this.content = content;
         if (typeof files === 'string')
             files = [files];
-        this.files = files;
+        this.files = this.files ? this.files : [];
     }
-    Document.prototype.compile = function () {
+    Document.prototype.fetchDirectory = function (path) {
         return __awaiter(this, void 0, void 0, function () {
-            var files, _loop_1, this_1, f;
-            var _this = this;
+            var data, d;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        if (!this.files)
-                            return [2 /*return*/];
-                        return [4 /*yield*/, this.fetchFiles(this.files)];
+                    case 0: return [4 /*yield*/, this.client.repos.getContent({
+                            owner: github_1.default.context.repo.owner,
+                            repo: github_1.default.context.repo.repo,
+                            path: path
+                        })];
                     case 1:
-                        files = _a.sent();
-                        _loop_1 = function (f) {
-                            var renderedContent = '';
-                            var fileName = files[f];
-                            var pathIn = path.resolve(__dirname, '../', this_1.directories.in, fileName);
-                            try {
-                                fs.readFile(pathIn, 'utf-8', function (err, data) {
-                                    if (err)
-                                        throw new Error("Failed to access defined file: " + pathIn);
-                                    var _a = _this.schema.apply(data), _ = _a._, sections = _a.sections;
-                                    if (!sections)
-                                        throw new Error('Invalid content');
-                                    for (var c in _this.content) {
-                                        renderedContent += sections[_this.content[c]] + "\n";
-                                        helpers_1.renderFile(renderedContent, _this.directories.out, fileName);
-                                    }
-                                });
-                            }
-                            catch (err) {
-                                console.error("ERROR: " + err);
-                            }
-                        };
-                        this_1 = this;
-                        for (f in files) {
-                            _loop_1(f);
+                        data = (_a.sent()).data;
+                        for (d in data) {
+                            console.log(d);
+                            // this.files?.push(d["down"]);
                         }
+                        return [2 /*return*/, data];
+                }
+            });
+        });
+    };
+    Document.prototype.compile = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var dir, files;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.fetchDirectory(this.directories.in)];
+                    case 1:
+                        dir = _a.sent();
+                        return [4 /*yield*/, this.fetchFiles(this.files)];
+                    case 2:
+                        files = _a.sent();
                         return [2 /*return*/];
                 }
             });

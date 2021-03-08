@@ -12,10 +12,12 @@ import {
 export default class Schema {
   public metadata: SchemaSection | undefined;
   public sections: { [key: string]: SchemaSection };
+  public githubMetadata: githubOptions | undefined;
 
   constructor(opts: SchemaOptions) {
       this.metadata = opts.metadata;
       this.sections = opts.sections;
+      this.githubMetadata = opts.githubOptions;
   }
 
   // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
@@ -72,7 +74,7 @@ function getSection(text: string, capture: string, flags: string = ''): string |
   } else { return; }
 }
 
-export async function parseSchema(schemaPath: string): Promise<SchemaOptions> {
+export async function parseSchemaPath(schemaPath: string, githubUser: githubOptions): Promise<SchemaOptions> {
   try {
     // TODO: should this be handled by user?
     // let p = path.resolve(__dirname, schemaPath);
@@ -83,7 +85,8 @@ export async function parseSchema(schemaPath: string): Promise<SchemaOptions> {
 
     return {
       metadata: parsedData['metadata'],
-      sections: parsedData['sections']
+      sections: parsedData['sections'],
+      githubOptions: githubUser
     };
   } catch (e) {
     return Promise.reject(e);
@@ -95,7 +98,8 @@ export async function parseSchema(schemaPath: string): Promise<SchemaOptions> {
  */
 interface SchemaOptions {
   metadata: SchemaSection | undefined;
-  sections: { [key: string]: SchemaSection };
+  sections: { [key: string]: SchemaSection }; 
+  githubOptions: githubOptions;
 }
 
 export interface SchemaSection extends BaseSection {
@@ -107,6 +111,11 @@ export interface SchemaSection extends BaseSection {
 interface BaseSection {
   start: string;
   end: string;
+}
+
+interface githubOptions {
+  owner: string;
+  repo: string;
 }
 
 
