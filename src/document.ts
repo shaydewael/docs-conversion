@@ -2,13 +2,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import axios from 'axios';
 import { Octokit } from '@octokit/core';
-// import { Octokit } from "@octokit/types";
+import { EndpointDefaults } from "@octokit/types";
 import { default as Schema } from './schema';
 import { renderFile } from './helpers';
 
 export default class Document {
   public schema: Schema;
-  // TODO: find type (https://www.npmjs.com/package/@octokit/types??)
   public client: Octokit;
   public content: string[];
   public directories: { in: string, out: string; };
@@ -70,7 +69,7 @@ export default class Document {
 
         renderedContent = Buffer.from(renderedContent).toString('base64');
 
-        const res = await this.client.repos.putContent({
+        const res = await this.client.repos.createOrUpdateFileContents({
           owner: this.schema.githubMetadata?.owner,
           repo: this.schema.githubMetadata?.repo,
           path: `${this.directories.out}/${currentFile.name}`,

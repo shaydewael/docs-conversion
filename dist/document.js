@@ -113,7 +113,7 @@ var Document = /** @class */ (function () {
                         // console.log(renderedContent);
                         // });
                         renderedContent = Buffer.from(renderedContent).toString('base64');
-                        return [4 /*yield*/, this.client.repos.putContent({
+                        return [4 /*yield*/, this.client.repos.createOrUpdateFileContents({
                                 owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
                                 repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
                                 path: this.directories.out + "/" + currentFile.name,
