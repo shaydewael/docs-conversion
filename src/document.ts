@@ -43,7 +43,7 @@ export default class Document {
 
     for (let d in data) {
       console.log(data[d]);
-      files.push(data[d].download_url);
+      files.push({ name: data[d].name, url: data[d].download_url });
     }
     return files;
   }
@@ -55,14 +55,14 @@ export default class Document {
     
     for (let f in files) {
       let renderedContent = '';
-      let fileName = files[f];
+      let currentFile = files[f];
       // console.log(fileName);
       // let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
       
       try {
         // fs.readFile(pathIn, 'utf-8', (err, data) => {
         //   if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
-        const { data } = await axios.get(files[f]);
+        const { data } = await axios.get(currentFile.url);
         // console.log(data);
 
         let { _, sections } = this.schema.apply(data);
@@ -76,13 +76,15 @@ export default class Document {
         // console.log(renderedContent);
         // });
 
-        // this.client.repos.putContent({
-        //   owner: this.schema.githubMetadata?.owner,
-        //   repo: this.schema.githubMetadata?.repo,
-        //   path: this.directories.out,
-        //   message: `Document Conversion: Add ${}`
-        // })
-        
+        renderedContent = btoa(renderedContent);
+
+        this.client.repos.putContent({
+          owner: this.schema.githubMetadata?.owner,
+          repo: this.schema.githubMetadata?.repo,
+          path: `${this.directories.out}/${currentFile.name}`,
+          content: renderedContent,
+          message: `Document Conversion: Add ${currentFile.name}`
+        });
 
       } catch(err) {
         console.error(`ERROR: ${err}`);
@@ -90,15 +92,15 @@ export default class Document {
     }
   }
 
-  private async fetchFiles(files?: string[]): Promise<string[]> {
-    let fileArr: string[] = [];
+  private async fetchFiles(files?: string[]): Promise<DocumentFile[]> {
+    let fileArr: DocumentFile[] = [];
 
     if (this.directories.in !== '') {
       return await this.fetchDirectory(this.directories.in)
     } else {
-      for (let f in files) {
-        fileArr.push(`${f}`);
-      }
+      // for (let f in files) {
+      //   fileArr.push(`${f}`);
+      // }
       return fileArr;
     }
   }
@@ -107,6 +109,11 @@ export default class Document {
 /**
  * Interfaces
  */
+
+interface DocumentFile {
+  name: string;
+  url: string;
+}
 
 interface DocumentOptions {
   client: Octokit;

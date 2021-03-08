@@ -71,7 +71,7 @@ var Document = /** @class */ (function () {
                         data = (_c.sent()).data;
                         for (d in data) {
                             console.log(data[d]);
-                            files.push(data[d].download_url);
+                            files.push({ name: data[d].name, url: data[d].download_url });
                         }
                         return [2 /*return*/, files];
                 }
@@ -79,30 +79,31 @@ var Document = /** @class */ (function () {
         });
     };
     Document.prototype.compile = function () {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var files, _a, _b, _i, f, renderedContent, fileName, data, _c, _, sections, c, err_1;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var files, _c, _d, _i, f, renderedContent, currentFile, data, _e, _, sections, c, err_1;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
                     case 0: return [4 /*yield*/, this.fetchFiles(this.files)];
                     case 1:
-                        files = _d.sent();
-                        _a = [];
-                        for (_b in files)
-                            _a.push(_b);
+                        files = _f.sent();
+                        _c = [];
+                        for (_d in files)
+                            _c.push(_d);
                         _i = 0;
-                        _d.label = 2;
+                        _f.label = 2;
                     case 2:
-                        if (!(_i < _a.length)) return [3 /*break*/, 7];
-                        f = _a[_i];
+                        if (!(_i < _c.length)) return [3 /*break*/, 7];
+                        f = _c[_i];
                         renderedContent = '';
-                        fileName = files[f];
-                        _d.label = 3;
+                        currentFile = files[f];
+                        _f.label = 3;
                     case 3:
-                        _d.trys.push([3, 5, , 6]);
-                        return [4 /*yield*/, axios_1.default.get(files[f])];
+                        _f.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, axios_1.default.get(currentFile.url)];
                     case 4:
-                        data = (_d.sent()).data;
-                        _c = this.schema.apply(data), _ = _c._, sections = _c.sections;
+                        data = (_f.sent()).data;
+                        _e = this.schema.apply(data), _ = _e._, sections = _e.sections;
                         if (!sections)
                             throw new Error('Invalid content');
                         for (c in this.content) {
@@ -110,9 +111,19 @@ var Document = /** @class */ (function () {
                             // console.log(renderedContent);
                             // renderFile(renderedContent, this.directories.out, fileName);
                         }
+                        // console.log(renderedContent);
+                        // });
+                        renderedContent = btoa(renderedContent);
+                        this.client.repos.putContent({
+                            owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
+                            repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
+                            path: this.directories.out + "/" + currentFile.name,
+                            content: renderedContent,
+                            message: "Document Conversion: Add " + currentFile.name
+                        });
                         return [3 /*break*/, 6];
                     case 5:
-                        err_1 = _d.sent();
+                        err_1 = _f.sent();
                         console.error("ERROR: " + err_1);
                         return [3 /*break*/, 6];
                     case 6:
@@ -125,7 +136,7 @@ var Document = /** @class */ (function () {
     };
     Document.prototype.fetchFiles = function (files) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileArr, f;
+            var fileArr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -133,11 +144,11 @@ var Document = /** @class */ (function () {
                         if (!(this.directories.in !== '')) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchDirectory(this.directories.in)];
                     case 1: return [2 /*return*/, _a.sent()];
-                    case 2:
-                        for (f in files) {
-                            fileArr.push("" + f);
-                        }
-                        return [2 /*return*/, fileArr];
+                    case 2: 
+                    // for (let f in files) {
+                    //   fileArr.push(`${f}`);
+                    // }
+                    return [2 /*return*/, fileArr];
                 }
             });
         });
