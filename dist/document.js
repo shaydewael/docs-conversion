@@ -1,23 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -54,9 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var path = __importStar(require("path"));
-var fs = __importStar(require("fs"));
+var axios_1 = __importDefault(require("axios"));
 var Document = /** @class */ (function () {
     function Document(_a) {
         var client = _a.client, files = _a.files, _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
@@ -72,21 +55,20 @@ var Document = /** @class */ (function () {
         this.files = this.files ? this.files : [];
     }
     Document.prototype.fetchDirectory = function (path) {
-        var _a, _b;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function () {
             var data, d;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0: return [4 /*yield*/, this.client.repos.getContent({
                             owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
                             repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
                             path: path
                         })];
                     case 1:
-                        data = (_c.sent()).data;
+                        data = (_d.sent()).data;
                         for (d in data) {
-                            console.log(data[d]);
-                            // this.files?.push(data[d]);
+                            (_c = this.files) === null || _c === void 0 ? void 0 : _c.push(data[d].download_url);
                         }
                         return [2 /*return*/, data];
                 }
@@ -95,30 +77,59 @@ var Document = /** @class */ (function () {
     };
     Document.prototype.compile = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var dir, files;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.fetchDirectory(this.directories.in)];
+            var files, _a, _b, _i, f, renderedContent, fileName, data, _c, _, sections, c, err_1;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0: return [4 /*yield*/, this.fetchFiles(this.files)];
                     case 1:
-                        dir = _a.sent();
-                        return [4 /*yield*/, this.fetchFiles(this.files)];
+                        files = _d.sent();
+                        _a = [];
+                        for (_b in files)
+                            _a.push(_b);
+                        _i = 0;
+                        _d.label = 2;
                     case 2:
-                        files = _a.sent();
-                        return [2 /*return*/];
+                        if (!(_i < _a.length)) return [3 /*break*/, 7];
+                        f = _a[_i];
+                        renderedContent = '';
+                        fileName = files[f];
+                        _d.label = 3;
+                    case 3:
+                        _d.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, axios_1.default.get(files[f])];
+                    case 4:
+                        data = (_d.sent()).data;
+                        console.log(data);
+                        _c = this.schema.apply(data), _ = _c._, sections = _c.sections;
+                        if (!sections)
+                            throw new Error('Invalid content');
+                        for (c in this.content) {
+                            renderedContent += sections[this.content[c]] + "\n";
+                            console.log(renderedContent);
+                            // renderFile(renderedContent, this.directories.out, fileName);
+                        }
+                        return [3 /*break*/, 6];
+                    case 5:
+                        err_1 = _d.sent();
+                        console.error("ERROR: " + err_1);
+                        return [3 /*break*/, 6];
+                    case 6:
+                        _i++;
+                        return [3 /*break*/, 2];
+                    case 7: return [2 /*return*/];
                 }
             });
         });
     };
     Document.prototype.fetchFiles = function (files) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileArr, inPath, f;
+            var fileArr, f;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         fileArr = [];
                         if (!(this.directories.in !== '')) return [3 /*break*/, 2];
-                        inPath = path.join(__dirname, "../" + this.directories.in);
-                        return [4 /*yield*/, fs.promises.readdir(inPath)];
+                        return [4 /*yield*/, this.fetchDirectory(this.directories.in)];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2:
                         for (f in files) {

@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { default as gh } from '@actions/github';
+import axios from 'axios';
 import { Octokit } from '@octokit/core';
 // import { Octokit } from "@octokit/types";
 import { default as Schema } from './schema';
@@ -41,44 +41,48 @@ export default class Document {
     });
 
     for (let d in data) {
-      console.log(data[d]);
-      // this.files?.push(data[d]);
+      this.files?.push(data[d].download_url);
     }
     return data;
   }
 
   public async compile() {
-    const dir = await this.fetchDirectory(this.directories.in);
+    // const dir = await this.fetchDirectory(this.directories.in);
     const files = await this.fetchFiles(this.files);
     
-    // for (let f in files) {
-    //   let renderedContent = '';
-    //   let fileName = files[f];
-    //   let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
+    for (let f in files) {
+      let renderedContent = '';
+      let fileName = files[f];
+      // let pathIn = path.resolve(__dirname, '../', this.directories.in, fileName);
       
-    //   try {
-    //     fs.readFile(pathIn, 'utf-8', (err, data) => {
-    //       if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
-    //       let { _, sections } = this.schema.apply(data);
-    //       if (!sections) throw new Error('Invalid content');
+      try {
+        // fs.readFile(pathIn, 'utf-8', (err, data) => {
+        //   if (err) throw new Error(`Failed to access defined file: ${pathIn}`);
+        const { data } = await axios.get(files[f]);
+        console.log(data);
 
-    //       for (let c in this.content) {
-    //         renderedContent += `${sections[this.content[c]]}\n`;
-    //         renderFile(renderedContent, this.directories.out, fileName);
-    //       }
-    //     });
-    //   } catch(err) {
-    //     console.error(`ERROR: ${err}`);
-    //   }
-    // }
+        let { _, sections } = this.schema.apply(data);
+        if (!sections) throw new Error('Invalid content');
+
+        for (let c in this.content) {
+          renderedContent += `${sections[this.content[c]]}\n`;
+          console.log(renderedContent);
+          // renderFile(renderedContent, this.directories.out, fileName);
+        }
+        // });
+        
+
+      } catch(err) {
+        console.error(`ERROR: ${err}`);
+      }
+    }
   }
 
   private async fetchFiles(files?: string[]): Promise<string[]> {
     let fileArr: string[] = [];
 
     if (this.directories.in !== '') {
-      let inPath = path.join(__dirname, `../${this.directories.in}`);
-      return await fs.promises.readdir(inPath);
+      return await this.fetchDirectory(this.directories.in)
     } else {
       for (let f in files) {
         fileArr.push(`${f}`);
