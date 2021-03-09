@@ -1,5 +1,3 @@
-import * as path from 'path';
-import * as fs from 'fs';
 import axios from 'axios';
 import { Octokit } from '@octokit/core';
 import { EndpointDefaults } from "@octokit/types";
@@ -69,7 +67,7 @@ export default class Document {
 
         renderedContent = Buffer.from(renderedContent).toString('base64');
 
-        const res = await this.client.repos.createOrUpdateFileContents({
+        const res = await this.client.repos.createOrUpdateFileContents(this.schema.githubMetadata, {
           owner: this.schema.githubMetadata?.owner,
           repo: this.schema.githubMetadata?.repo,
           path: `${this.directories.out}/${currentFile.name}`,

@@ -1,6 +1,4 @@
 import * as yaml from 'js-yaml';
-import * as fs from 'fs';
-import * as path from 'path';
 import axios from 'axios';
 import {
   lb,
@@ -8,16 +6,17 @@ import {
   toPosBehind,
   coreGroup
 } from './helpers';
+import { githubMetadata } from './github';
 
 export default class Schema {
   public metadata: SchemaSection | undefined;
   public sections: { [key: string]: SchemaSection };
-  public githubMetadata: githubOptions | undefined;
+  public githubMetadata: githubMetadata;
 
   constructor(opts: SchemaOptions) {
       this.metadata = opts.metadata;
       this.sections = opts.sections;
-      this.githubMetadata = opts.githubOptions;
+      this.githubMetadata = opts.githubMetadata;
   }
 
   // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
@@ -74,10 +73,9 @@ function getSection(text: string, capture: string, flags: string = ''): string |
   } else { return; }
 }
 
-export async function parseSchemaPath(schemaPath: string, githubUser: githubOptions): Promise<SchemaOptions> {
+export async function parseSchemaPath(schemaPath: string, githubUser: githubMetadata): Promise<SchemaOptions> {
   try {
     // TODO: should this be handled by user?
-    // let p = path.resolve(__dirname, schemaPath);
     const { data } = await axios.get(schemaPath);
     const parsedData: any = yaml.load(data);
 
@@ -86,7 +84,7 @@ export async function parseSchemaPath(schemaPath: string, githubUser: githubOpti
     return {
       metadata: parsedData['metadata'],
       sections: parsedData['sections'],
-      githubOptions: githubUser
+      githubMetadata: githubUser
     };
   } catch (e) {
     return Promise.reject(e);
@@ -99,7 +97,7 @@ export async function parseSchemaPath(schemaPath: string, githubUser: githubOpti
 interface SchemaOptions {
   metadata: SchemaSection | undefined;
   sections: { [key: string]: SchemaSection }; 
-  githubOptions: githubOptions;
+  githubMetadata: githubMetadata;
 }
 
 export interface SchemaSection extends BaseSection {
@@ -112,10 +110,3 @@ interface BaseSection {
   start: string;
   end: string;
 }
-
-interface githubOptions {
-  owner: string;
-  repo: string;
-}
-
-

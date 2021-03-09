@@ -66,7 +66,7 @@ var Schema = /** @class */ (function () {
     function Schema(opts) {
         this.metadata = opts.metadata;
         this.sections = opts.sections;
-        this.githubMetadata = opts.githubOptions;
+        this.githubMetadata = opts.githubMetadata;
     }
     // everything between two strings, including new lines: /(?<=---[\r\n])(.|[\r\n])*(?=---)/gm
     Schema.prototype.apply = function (fileContent) {
@@ -140,7 +140,7 @@ function parseSchemaPath(schemaPath, githubUser) {
                     return [2 /*return*/, {
                             metadata: parsedData['metadata'],
                             sections: parsedData['sections'],
-                            githubOptions: githubUser
+                            githubMetadata: githubUser
                         }];
                 case 2:
                     e_1 = _a.sent();
