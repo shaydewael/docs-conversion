@@ -1,21 +1,27 @@
 name: 'Docs conversion'
 author: 'Shay DeWael'
-description: 'Automatically parse and convert markdown files using YAML templates'
+description: 'Parse and convert markdown files using YAML templates'
+branding:
+  icon: book-open
+  color: blue
 inputs:
   repo-token:
       description: 'The GITHUB_TOKEN secret'
+      required: true
   schema:
     description: 'Defines schema used to parse content'
     required: true
-    default: false
+    default: ''
   input:
     description: 'Directories contain the .md files'
     required: false
-    default: false
   output:
     description: 'Directory to ouput files'
+    required: false
+    default: 'docs/compiled'
+  components:
+    description: 'Array of document components'
     required: true
-    default: './docs-output'
 
 runs:
   using: 'node12'

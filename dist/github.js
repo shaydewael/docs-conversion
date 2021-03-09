@@ -36,19 +36,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createGithubFile = void 0;
-function createGithubFile(metadata, fileOpts, client) {
+exports.getGithubDirectoryFiles = exports.getGithubFile = exports.createGithubFile = void 0;
+function createGithubFile(client, metadata, fileOpts) {
     return __awaiter(this, void 0, void 0, function () {
         var path, content, message, res, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     path = fileOpts.path, content = fileOpts.content, message = fileOpts.message;
+                    if (typeof content === 'string') {
+                        content = Buffer.from(content).toString('base64');
+                    }
                     message = message ? message : "Creating file: " + path;
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, client.reposfcreateOrUpdateFileContents({
+                    return [4 /*yield*/, client.repos.createOrUpdateFileContents({
                             path: path,
                             content: content,
                             message: message,
@@ -57,6 +60,9 @@ function createGithubFile(metadata, fileOpts, client) {
                         })];
                 case 2:
                     res = _a.sent();
+                    // TODO
+                    if (!res.content)
+                        throw new Error("No content");
                     return [3 /*break*/, 4];
                 case 3:
                     e_1 = _a.sent();
@@ -68,3 +74,65 @@ function createGithubFile(metadata, fileOpts, client) {
     });
 }
 exports.createGithubFile = createGithubFile;
+function getGithubFile(client, metadata, path) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data, content, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, client.repos.getContent({
+                            path: path,
+                            owner: metadata.owner,
+                            repo: metadata.repo
+                        })];
+                case 1:
+                    data = (_a.sent()).data;
+                    content = Buffer.from(data.content, 'base64').toString('ascii');
+                    if (content === '')
+                        throw new Error("Error parsing content: " + path);
+                    return [2 /*return*/, {
+                            content: content,
+                            name: data.name,
+                            url: data.url
+                        }];
+                case 2:
+                    e_2 = _a.sent();
+                    console.error("Error fetching file: " + e_2);
+                    return [2 /*return*/, Promise.reject(e_2)];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getGithubFile = getGithubFile;
+function getGithubDirectoryFiles(client, metadata, path) {
+    return __awaiter(this, void 0, void 0, function () {
+        var files, data, f, e_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    files = [];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, client.repos.getContent({
+                            path: path,
+                            owner: metadata.owner,
+                            repo: metadata.repo
+                        })];
+                case 2:
+                    data = (_a.sent()).data;
+                    for (f in data) {
+                        files.push(path + "/" + data[f].path);
+                    }
+                    return [2 /*return*/, files];
+                case 3:
+                    e_3 = _a.sent();
+                    return [2 /*return*/, console.error("Error fetching file: " + e_3)];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getGithubDirectoryFiles = getGithubDirectoryFiles;

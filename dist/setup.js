@@ -54,62 +54,57 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var core = __importStar(require("@actions/core"));
 var gh = __importStar(require("@actions/github"));
-var schema_1 = __importDefault(require("./schema"));
-var document_1 = __importDefault(require("./document"));
-var github_1 = require("./github");
+var core = __importStar(require("@actions/core"));
 var yaml = __importStar(require("js-yaml"));
-function run() {
+var github_1 = require("./github");
+// type getRepoContentParameters = Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["parameters"];
+// type getRepoContentResponse = Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"];
+function setup() {
     return __awaiter(this, void 0, void 0, function () {
-        var action, client, user, schemaFile, schemaContent, schema, doc, e_1;
+        var token, schemaPath, client, ghUser, schemaFile;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    action = {
-                        token: core.getInput('repo-token', { required: true }),
-                        schemaPath: core.getInput('schema', { required: true }),
-                        out_dir: core.getInput('output', { required: false }),
-                        in_dir: core.getInput('input', { required: false })
-                    };
-                    client = gh.getOctokit(action.token);
-                    user = {
-                        owner: gh.context.repo.owner,
-                        repo: gh.context.repo.repo
-                    };
-                    return [4 /*yield*/, github_1.getGithubFile(client, user, action.schemaPath)];
-                case 1:
-                    schemaFile = _a.sent();
-                    if (!schemaFile.content)
-                        throw new Error("No content in schema");
-                    schemaContent = yaml.load(schemaFile.content);
-                    schema = new schema_1.default({
-                        metadata: schemaContent['metadata'],
-                        sections: schemaContent['sections'],
-                        output: schemaContent['output'],
-                        githubMetadata: user
-                    });
-                    doc = new document_1.default({
-                        schema: schema,
-                        client: client,
-                        directories: {
-                            out: action.out_dir,
-                            in: action.in_dir
-                        }
-                    }).compile();
-                    return [3 /*break*/, 3];
-                case 2:
-                    e_1 = _a.sent();
-                    console.error(e_1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+            token = core.getInput('repo-token', { required: true });
+            schemaPath = core.getInput('schema', { required: true });
+            client = gh.getOctokit(token);
+            if (schemaPath === '') {
+                throw new Error('Error: schema path must be a valid relative path');
             }
+            ghUser = {
+                owner: gh.context.repo.owner,
+                repo: gh.context.repo.repo
+            };
+            try {
+                schemaFile = github_1.getGithubFile(client, ghUser, schemaPath).then(function (res) {
+                    if (!res.content)
+                        throw new Error("No content in schema");
+                    var content = yaml.load(res.content);
+                    if (!content["sections"])
+                        throw new Error("Invalid schema. Sections must exist");
+                    // TODO: write to local file
+                    return;
+                });
+            }
+            catch (e) {
+                return [2 /*return*/, console.log('Error: failed to retrieve schema')];
+            }
+            return [2 /*return*/];
         });
     });
 }
-run();
+// async function parseSchemaPath(schemaPath: string, githubUser: GithubMetadata): Promise<SchemaOptions> {
+//   try {
+//     // TODO: should this be handled by user?
+//     const { data } = await axios.get(schemaPath);
+//     const parsedData: any = yaml.load(data);
+//     if (!parsedData["sections"]) throw new Error("Invalid schema. Sections must exist");
+//     return {
+//       metadata: parsedData['metadata'],
+//       sections: parsedData['sections'],
+//       githubMetadata: githubUser
+//     };
+//   } catch (e) {
+//     return Promise.reject(e);
+//   }
+// }

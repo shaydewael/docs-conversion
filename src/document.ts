@@ -1,13 +1,12 @@
 import axios from 'axios';
 import { Octokit } from '@octokit/core';
-import { EndpointDefaults } from "@octokit/types";
 import { default as Schema } from './schema';
-import { renderFile } from './helpers';
+import { createGithubFile, getGithubDirectoryFiles, getGithubFile } from './github';
 
 export default class Document {
   public schema: Schema;
   public client: Octokit;
-  public content: string[];
+  public components: string[];
   public directories: { in: string, out: string; };
   private files: string[] | undefined;
 
@@ -18,30 +17,15 @@ export default class Document {
     directories = {
       in: '',
       out: '',
-    },
-    content = []
+    }
   }: DocumentOptions) {
     this.schema = schema as Schema;
     this.client = client;
     this.directories = directories.in ? directories : { in: '', out: directories.out };
-    this.content = content;
+    this.components = this.schema.output;
 
     if (typeof files === 'string') files = [files];
     this.files = this.files ? this.files : [];
-  }
-
-  private async fetchDirectory(path: string) {
-    const files = [];
-    let { data } = await this.client.repos.getContent({
-      owner: this.schema.githubMetadata?.owner,
-      repo: this.schema.githubMetadata?.repo,
-      path: path
-    });
-
-    for (let d in data) {
-      files.push({ name: data[d].name, url: data[d].download_url });
-    }
-    return files;
   }
 
   public async compile() {
@@ -52,31 +36,18 @@ export default class Document {
       let currentFile = files[f];
       
       try {
-        const { data } = await axios.get(currentFile.url);
-
-        let { _, sections } = this.schema.apply(data);
+        // Apply schema to single file
+        let { _, sections } = this.schema.apply(currentFile.content);
         if (!sections) throw new Error('Invalid content');
-
-        for (let c in this.content) {
-          renderedContent += `${sections[this.content[c]]}\n`;
-          // console.log(renderedContent);
-          // renderFile(renderedContent, this.directories.out, fileName);
+        // Fetch each component from file
+        for (let c in this.components) {
+          renderedContent += `${sections[this.components[c]]}\n`;
         }
-        // console.log(renderedContent);
-        // });
 
-        renderedContent = Buffer.from(renderedContent).toString('base64');
-
-        const res = await this.client.repos.createOrUpdateFileContents(this.schema.githubMetadata, {
-          owner: this.schema.githubMetadata?.owner,
-          repo: this.schema.githubMetadata?.repo,
+        await createGithubFile(this.client, this.schema.githubMetadata, {
           path: `${this.directories.out}/${currentFile.name}`,
           content: renderedContent,
-          message: `Document Conversion: Add ${currentFile.name}`
         });
-
-        console.log(res);
-
       } catch(err) {
         console.error(`ERROR: ${err}`);
       }
@@ -85,15 +56,20 @@ export default class Document {
 
   private async fetchFiles(files?: string[]): Promise<DocumentFile[]> {
     let fileArr: DocumentFile[] = [];
+    files = files ? files : [];
 
     if (this.directories.in !== '') {
-      return await this.fetchDirectory(this.directories.in)
-    } else {
-      // for (let f in files) {
-      //   fileArr.push(`${f}`);
-      // }
-      return fileArr;
+      // Get directory contents
+      files = await getGithubDirectoryFiles(this.client, this.schema.githubMetadata, this.directories.in);
     }
+
+    for (let f in files) {
+      // Get the file contents
+      let ghFile = await getGithubFile(this.client, this.schema.githubMetadata, f);
+      // TODO: error check
+      fileArr.push(ghFile);
+    }
+    return fileArr;
   }
 }
 
@@ -101,8 +77,9 @@ export default class Document {
  * Interfaces
  */
 
-interface DocumentFile {
+export interface DocumentFile {
   name: string;
+  content: string;
   url: string;
 }
 
@@ -114,5 +91,5 @@ interface DocumentOptions {
     in: string;
     out: string;
   };
-  content: string[];
+  components: string[];
 }

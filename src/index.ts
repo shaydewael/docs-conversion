@@ -1,76 +1,45 @@
 import * as core from '@actions/core';
 import * as gh from '@actions/github';
-import * as fs from 'fs';
-import { default as Schema, parseSchemaPath } from './schema';
+import { default as Schema } from './schema';
 import { default as Document } from './document';
-import axios from 'axios';
+import { getGithubFile } from './github';
+import * as yaml from 'js-yaml';
 
 async function run() {
     try {
-        const token = core.getInput('repo-token', { required: true });
-        const schemaPath = core.getInput('schema', { required: true });
-        const out_dir = core.getInput('output', { required: true });
-        const in_dir = core.getInput('input', { required: true });
+        const action = {
+            token: core.getInput('repo-token', { required: true }),
+            schemaPath: core.getInput('schema', { required: true }),
+            out_dir: core.getInput('output', { required: false }),
+            in_dir: core.getInput('input', { required: false })
+        };
     
-        const client = gh.getOctokit(token);
-        const ghUser = { 
+        const client = gh.getOctokit(action.token);
+        const user = { 
             owner: gh.context.repo.owner,
             repo: gh.context.repo.repo
         };
 
-        // let { data } = await client.repos.getContent({
-        //     owner: gh.context.repo.owner,
-        //     repo: gh.context.repo.repo,
-        //     path: in_dir
-        // });
-
-        const schemaContent = await parseSchemaPath(
-            `https://raw.githubusercontent.com/${gh.context.repo.owner}/${gh.context.repo.repo}/main/${schemaPath}`,
-            { owner: gh.context.repo.owner, repo: gh.context.repo.repo})
-        const schema = new Schema(schemaContent);
+        // Get schema file
+        const schemaFile = await getGithubFile(client, user, action.schemaPath);
+        if (!schemaFile.content) throw new Error(`No content in schema`);
+        // convert from yaml -> json
+        const schemaContent: any = yaml.load(schemaFile.content);
+        const schema = new Schema({
+            metadata: schemaContent['metadata'],
+            sections: schemaContent['sections'],
+            output: schemaContent['output'],
+            githubMetadata: user
+        });
 
         const doc = new Document({
             schema: schema,
             client: client,
-            // files: ['../samples/doc1.md', '../samples/doc2.md'],
             directories: {
-                out: 'compiled',
-                in: in_dir
-            },
-            content: [ 'main', 'code' ]
+                out: action.out_dir,
+                in: action.in_dir
+            }
         }).compile();
-
-        // let files = [];
-        // for (let d in data) {
-        //     files.push(d);
-        //     console.log(files);
-        // const doc = new Document({
-        //     schema: schema,
-        //     client: client,
-        //     // files: ['../samples/doc1.md', '../samples/doc2.md'],
-        //     directories: {
-        //         out: 'compiled',
-        //         in: in_dir
-        //     },
-        //     content: [ 'main', 'code' ]
-        // }).compile();
-        // }
-
-
-        // Define the template
-        // const schema = new Schema({
-        //     path: schemaPath,
-        // });
-    
-    //     const doc = new Document({
-    //         schema: schema,
-    //         // files: ['../samples/doc1.md', '../samples/doc2.md'],
-    //         directories: {
-    //             out: 'compiled',
-    //             in: 'samples'
-    //         },
-    //         content: [ 'main', 'code' ]
-    //     }).compile();
     } catch (e) {
         console.error(e);
     }

@@ -35,122 +35,102 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var axios_1 = __importDefault(require("axios"));
+var github_1 = require("./github");
 var Document = /** @class */ (function () {
     function Document(_a) {
         var client = _a.client, files = _a.files, _b = _a.schema, schema = _b === void 0 ? undefined : _b, _c = _a.directories, directories = _c === void 0 ? {
             in: '',
             out: '',
-        } : _c, _d = _a.content, content = _d === void 0 ? [] : _d;
+        } : _c;
         this.schema = schema;
         this.client = client;
         this.directories = directories.in ? directories : { in: '', out: directories.out };
-        this.content = content;
+        this.components = this.schema.output;
         if (typeof files === 'string')
             files = [files];
         this.files = this.files ? this.files : [];
     }
-    Document.prototype.fetchDirectory = function (path) {
-        var _a, _b;
-        return __awaiter(this, void 0, void 0, function () {
-            var files, data, d;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        files = [];
-                        return [4 /*yield*/, this.client.repos.getContent({
-                                owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
-                                repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
-                                path: path
-                            })];
-                    case 1:
-                        data = (_c.sent()).data;
-                        for (d in data) {
-                            files.push({ name: data[d].name, url: data[d].download_url });
-                        }
-                        return [2 /*return*/, files];
-                }
-            });
-        });
-    };
     Document.prototype.compile = function () {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var files, _c, _d, _i, f, renderedContent, currentFile, data, _e, _, sections, c, res, err_1;
-            return __generator(this, function (_f) {
-                switch (_f.label) {
+            var files, _a, _b, _i, f, renderedContent, currentFile, _c, _, sections, c, err_1;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0: return [4 /*yield*/, this.fetchFiles(this.files)];
                     case 1:
-                        files = _f.sent();
-                        _c = [];
-                        for (_d in files)
-                            _c.push(_d);
+                        files = _d.sent();
+                        _a = [];
+                        for (_b in files)
+                            _a.push(_b);
                         _i = 0;
-                        _f.label = 2;
+                        _d.label = 2;
                     case 2:
-                        if (!(_i < _c.length)) return [3 /*break*/, 8];
-                        f = _c[_i];
+                        if (!(_i < _a.length)) return [3 /*break*/, 7];
+                        f = _a[_i];
                         renderedContent = '';
                         currentFile = files[f];
-                        _f.label = 3;
+                        _d.label = 3;
                     case 3:
-                        _f.trys.push([3, 6, , 7]);
-                        return [4 /*yield*/, axios_1.default.get(currentFile.url)];
-                    case 4:
-                        data = (_f.sent()).data;
-                        _e = this.schema.apply(data), _ = _e._, sections = _e.sections;
+                        _d.trys.push([3, 5, , 6]);
+                        _c = this.schema.apply(currentFile.content), _ = _c._, sections = _c.sections;
                         if (!sections)
                             throw new Error('Invalid content');
-                        for (c in this.content) {
-                            renderedContent += sections[this.content[c]] + "\n";
-                            // console.log(renderedContent);
-                            // renderFile(renderedContent, this.directories.out, fileName);
+                        // Fetch each component from file
+                        for (c in this.components) {
+                            renderedContent += sections[this.components[c]] + "\n";
                         }
-                        // console.log(renderedContent);
-                        // });
-                        renderedContent = Buffer.from(renderedContent).toString('base64');
-                        return [4 /*yield*/, this.client.repos.createOrUpdateFileContents(this.schema.githubMetadata, {
-                                owner: (_a = this.schema.githubMetadata) === null || _a === void 0 ? void 0 : _a.owner,
-                                repo: (_b = this.schema.githubMetadata) === null || _b === void 0 ? void 0 : _b.repo,
+                        return [4 /*yield*/, github_1.createGithubFile(this.client, this.schema.githubMetadata, {
                                 path: this.directories.out + "/" + currentFile.name,
                                 content: renderedContent,
-                                message: "Document Conversion: Add " + currentFile.name
                             })];
+                    case 4:
+                        _d.sent();
+                        return [3 /*break*/, 6];
                     case 5:
-                        res = _f.sent();
-                        console.log(res);
-                        return [3 /*break*/, 7];
-                    case 6:
-                        err_1 = _f.sent();
+                        err_1 = _d.sent();
                         console.error("ERROR: " + err_1);
-                        return [3 /*break*/, 7];
-                    case 7:
+                        return [3 /*break*/, 6];
+                    case 6:
                         _i++;
                         return [3 /*break*/, 2];
-                    case 8: return [2 /*return*/];
+                    case 7: return [2 /*return*/];
                 }
             });
         });
     };
     Document.prototype.fetchFiles = function (files) {
         return __awaiter(this, void 0, void 0, function () {
-            var fileArr;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var fileArr, _a, _b, _i, f, ghFile;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         fileArr = [];
+                        files = files ? files : [];
                         if (!(this.directories.in !== '')) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.fetchDirectory(this.directories.in)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2: 
-                    // for (let f in files) {
-                    //   fileArr.push(`${f}`);
-                    // }
-                    return [2 /*return*/, fileArr];
+                        return [4 /*yield*/, github_1.getGithubDirectoryFiles(this.client, this.schema.githubMetadata, this.directories.in)];
+                    case 1:
+                        // Get directory contents
+                        files = _c.sent();
+                        _c.label = 2;
+                    case 2:
+                        _a = [];
+                        for (_b in files)
+                            _a.push(_b);
+                        _i = 0;
+                        _c.label = 3;
+                    case 3:
+                        if (!(_i < _a.length)) return [3 /*break*/, 6];
+                        f = _a[_i];
+                        return [4 /*yield*/, github_1.getGithubFile(this.client, this.schema.githubMetadata, f)];
+                    case 4:
+                        ghFile = _c.sent();
+                        // TODO: error check
+                        fileArr.push(ghFile);
+                        _c.label = 5;
+                    case 5:
+                        _i++;
+                        return [3 /*break*/, 3];
+                    case 6: return [2 /*return*/, fileArr];
                 }
             });
         });

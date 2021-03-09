@@ -1,21 +1,21 @@
-import * as yaml from 'js-yaml';
-import axios from 'axios';
 import {
   lb,
   toPosAhead, 
   toPosBehind,
   coreGroup
 } from './helpers';
-import { githubMetadata } from './github';
+import { GithubMetadata } from './github';
 
 export default class Schema {
   public metadata: SchemaSection | undefined;
   public sections: { [key: string]: SchemaSection };
-  public githubMetadata: githubMetadata;
+  public output: string[];
+  public githubMetadata: GithubMetadata;
 
   constructor(opts: SchemaOptions) {
       this.metadata = opts.metadata;
       this.sections = opts.sections;
+      this.output = opts.output;
       this.githubMetadata = opts.githubMetadata;
   }
 
@@ -73,31 +73,16 @@ function getSection(text: string, capture: string, flags: string = ''): string |
   } else { return; }
 }
 
-export async function parseSchemaPath(schemaPath: string, githubUser: githubMetadata): Promise<SchemaOptions> {
-  try {
-    // TODO: should this be handled by user?
-    const { data } = await axios.get(schemaPath);
-    const parsedData: any = yaml.load(data);
 
-    if (!parsedData["sections"]) throw new Error("Invalid schema. Sections must exist");
-
-    return {
-      metadata: parsedData['metadata'],
-      sections: parsedData['sections'],
-      githubMetadata: githubUser
-    };
-  } catch (e) {
-    return Promise.reject(e);
-  }
-}
 
 /**
  * Interfaces
  */
 interface SchemaOptions {
   metadata: SchemaSection | undefined;
-  sections: { [key: string]: SchemaSection }; 
-  githubMetadata: githubMetadata;
+  sections: { [key: string]: SchemaSection };
+  output: string[];
+  githubMetadata: GithubMetadata;
 }
 
 export interface SchemaSection extends BaseSection {
